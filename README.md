@@ -23,7 +23,7 @@ Produit autocallable avec :
 
 ### Structure du payoff :
 
-- Si \($S_t \geq 100 \%$ \) → remboursement anticipé + coupon  
+- Si \($S_t \geq 100 \%%$ \) → remboursement anticipé + coupon  
 - Sinon → le produit continue  
 - À maturité :
   - Si \( $S_T \geq 60 \%$ \) → remboursement du capital  
