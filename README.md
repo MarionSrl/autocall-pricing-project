@@ -162,7 +162,7 @@ Résultats :
 - Modèle de volatilité stochastique (Heston)  
 - Smile de volatilité  
 - Produits multi-sous-jacents (Worst-of autocall)  
-- Pricer en EDP) 
+- Pricer en EDP
 
 ---
 
