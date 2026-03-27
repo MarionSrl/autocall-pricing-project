@@ -149,10 +149,10 @@ Résultats :
 
 ## Structure du projet
 notebooks/ # Analyse et visualisations
-├── src/ # Fonctions de pricing et simulation
-├── results/ # Graphiques et résultats
-├── README.md
-└── requirements.txt
+src/ # Fonctions de pricing et simulation
+results/ # Graphiques et résultats
+README.md # Explication du projet
+requirements.txt # Bibilothèque nécessaire
 
 
 ---
