@@ -139,6 +139,15 @@ Résultats :
 
 ---
 
+## Installation
+Pour exécuter le projet, il est recommandé de créer un environnement virtuel afin d’isoler les dépendances :
+
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+---
+
 ## Bibilothèque nécessaire
 - Python  
 - NumPy  
