@@ -182,4 +182,3 @@ pip install -r requirements.txt
 ## Auteur
 
 Projet réalisé dans le cadre du **cours Produits Structurés — M2 BFA (Dauphine) par Juliette Colombani, Violaine Mencke, Mathilde Largarde, Marion Sirol**.
->>>>>>> dev
