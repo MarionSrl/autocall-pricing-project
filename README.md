@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# Autocall-pricing-project
-Monte Carlo pricing et hedging d'un produit autocallable
-=======
 # Pricing et Hedging d’un Produit Autocallable
 
 ## Objectif du projet
