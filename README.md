@@ -132,7 +132,7 @@ Résultats :
 ## Résultats clés
 
 - Plus la volatilité est élevée, plus la probabilité d’autocall diminue  
-- Le produit est **short vega**  
+- Le produit est globallement **short vega**  
 - Le hedging n’est pas parfait (risque gamma)  
 - Les taux stochastiques ont un impact non négligeable  
 - Le PnL de hedging dépend fortement des conditions de marché  
