@@ -412,6 +412,81 @@ simplification.
 - **Convention du coupon à mémoire sans barrière de coupon indépendante** : voir le
   paragraphe dédié ci-dessus.
 
+## Note méthodologique
+
+*Section rédigée pour être reprise telle quelle en annexe méthodologique du mémoire —
+elle reprend, en texte continu, l'ensemble des hypothèses et limites détaillées plus
+haut sous forme de listes.*
+
+Les trois figures reposent sur un cadre de simulation Black-Scholes standard, à
+volatilité constante et sans smile ni skew : chaque sous-jacent est modélisé par un
+mouvement brownien géométrique sous la probabilité risque-neutre, avec un taux sans
+risque, un rendement de dividende et une volatilité fixés une fois pour toutes
+(respectivement 2,5 %, 3 % et 18 % pour les indices actions des Figures 1 et 2). Cette
+simplification est délibérée : elle isole l'effet des mécanismes étudiés — décrément,
+barrière dégressive, plafond de volatilité — de tout effet confondu par la structure par
+terme ou le sourire de volatilité du marché. Elle a cependant un coût : en pratique, un
+skew de volatilité affecterait différemment les sensibilités mesurées à proximité des
+barrières, qu'il s'agisse du rappel ou de la protection du capital, et son absence tend
+probablement à sous-estimer l'ampleur des sensibilités mises en évidence dans les
+Figures 1 et 3.
+
+La notion de barrière recouvre par ailleurs deux conventions distinctes dans ce travail,
+qu'il convient de ne pas confondre. La protection du capital (PDI) du produit autocall
+étudié dans les Figures 2 et 1(b) n'est observée qu'à l'échéance : il s'agit d'une
+condition terminale portant sur le seul niveau du sous-jacent à maturité, et non d'un
+monitoring, discret ou continu, d'une barrière tout au long de la vie du produit — c'est
+la convention la plus fréquente en retail, et elle ne pose donc aucune ambiguïté de
+fréquence d'observation, ni ne nécessite de correction de type
+Broadie–Glasserman–Kou. Le panneau (a) de la Figure 1, en revanche, illustre un objet
+différent : un véritable put down-and-in à barrière continûment observée, dans sa
+formulation fermée usuelle (Bouzoubaa & Osseiran ; Hull), qui sert de démonstration
+pédagogique du profil de sensibilités caractéristique des options à barrière, en
+particulier de la discontinuité du delta au franchissement. Pour valider cette formule
+fermée par une simulation Monte Carlo indépendante malgré une trajectoire
+nécessairement simulée à pas discret, une correction de continuité par pont brownien
+est appliquée ; elle ne concerne que cette validation ponctuelle et n'intervient à
+aucun moment dans le pricing du produit autocall proprement dit.
+
+Le produit autocall retenu suit une convention de coupon « à mémoire » sans barrière de
+coupon indépendante de la barrière de rappel : à la date de rappel, le porteur perçoit
+l'ensemble des coupons annuels cumulés depuis l'origine, mais si le produit atteint la
+maturité sans avoir jamais été rappelé, aucun coupon n'est versé — seul le capital,
+protégé ou non selon le niveau du sous-jacent à l'échéance, est remboursé. Cette
+convention n'est pas neutre pour l'interprétation de la Figure 2 : les sous-jacents à
+décrément retardant mécaniquement le rappel, ils augmentent la probabilité d'aller à
+maturité sans avoir jamais perçu de coupon, de sorte qu'une partie de la hausse du
+coupon facial qu'ils affichent au pair compense ce risque de ne rien percevoir, et pas
+seulement le risque de perte en capital que mesure la probabilité d'activation du PDI.
+
+Aucun coût de transaction ni frais de gestion n'est par ailleurs pris en compte, que ce
+soit dans la réplication du décrément des indices B et C ou dans le rebalancement
+quotidien de l'indice à cible de volatilité de la Figure 3 entre le sous-jacent et le
+cash. Les mécanismes étudiés sont donc présentés dans leur configuration la plus
+favorable ; l'indice Volatility Target, dont l'exposition varie précisément le plus dans
+les phases où le mécanisme est le plus actif, verrait notamment sa performance amputée
+d'autant plus fortement par des coûts de rebalancement réalistes.
+
+Enfin, la volatilité sous-jacente à l'indice Volatility Target de la Figure 3 est
+modélisée par une chaîne de Markov à deux régimes — volatilité basse et volatilité de
+stress, avec des durées moyennes de séjour distinctes — plutôt que par un modèle à
+volatilité stochastique complet de type Heston. Ce choix se justifie par le fait que
+seule la persistance temporelle de la volatilité réalisée importe ici — c'est la
+condition nécessaire et suffisante pour que le mécanisme de cible de volatilité ait un
+intérêt démonstratif — et non la forme fine de sa distribution ; le modèle à régimes
+l'obtient avec un nombre de paramètres réduit et directement interprétables, sans les
+difficultés numériques propres à Heston, telles que la condition de Feller ou le choix
+d'un schéma de discrétisation évitant les variances négatives. Le scénario en V scripté
+de cette même figure, construit de façon déterministe pour isoler l'effet d'un choc de
+marché rapide suivi d'un rebond symétrique, comporte une simplification supplémentaire
+propre à sa construction : la période précédant le choc y est parfaitement plate, donc
+de volatilité réalisée strictement nulle, ce qui porte l'exposition de l'indice
+Volatility Target à son plafond de façon plus systématique qu'une période réellement
+calme ne le ferait. L'effet de sur-exposition au moment du choc qui en résulte est donc
+probablement amplifié par cette construction ; l'effet de sous-participation au rebond
+qui suit, piloté non par le niveau de volatilité pré-choc mais par le retard structurel
+inhérent à toute fenêtre glissante, est en revanche robuste à cette simplification.
+
 ## Extensions possibles
 
 - Modèle de volatilité stochastique (Heston)  
