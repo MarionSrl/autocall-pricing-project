@@ -5,6 +5,7 @@ from src.indices import (
     simuler_indices,
     forward_theorique_decrement_points,
     barriere_degressive,
+    indice_decrement_pourcentage,
 )
 
 S0, R, Q, SIGMA, D, K = 100.0, 0.025, 0.03, 0.18, 0.05, 5.0
@@ -59,6 +60,16 @@ def test_barriere_degressive_decroissante_et_plafonnee():
     assert b[-1] == pytest.approx(0.70)
     assert np.all(np.diff(b) <= 0)
     assert np.all(b >= 0.70)
+
+
+def test_decrement_pourcentage_egal_dividende_redonne_indice_classique():
+    # Cas de contrôle B' de la Figure 2 : quand D = q, l'indice à décrément en %
+    # est identique, trajectoire par trajectoire, à l'indice classique A (même
+    # construction : mêmes chocs, même drift effectif r - q). Isole l'effet du
+    # mécanisme de décrément de l'effet "D > q".
+    res = _simuler(nb_sim=2_000, nb_pas_an=12)
+    B_prime = indice_decrement_pourcentage(res["U"], res["t_obs"], D=Q)
+    np.testing.assert_allclose(B_prime, res["A"], rtol=1e-9, atol=1e-9)
 
 
 def test_memes_chocs_partages_entre_A_et_U():

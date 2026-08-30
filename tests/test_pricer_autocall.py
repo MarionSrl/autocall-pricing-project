@@ -1,6 +1,7 @@
 import numpy as np
+import pytest
 
-from src.indices import simuler_indices, barriere_degressive
+from src.indices import simuler_indices, barriere_degressive, indice_decrement_pourcentage
 from src.pricer_autocall import pricer_autocall
 from src.coupon_solver import resoudre_coupon_pair
 
@@ -48,6 +49,20 @@ def test_coupon_solver_converge_au_pair():
     coupon_pair, resultat = resoudre_coupon_pair(spots_A, S0, R, DATES_OBS, 1.0, BARRIERE_CAP, nominal=1.0)
     assert 0.0 < coupon_pair < 0.20
     assert abs(resultat.prix - 1.0) < 5 * resultat.erreur_std
+
+
+def test_coupon_pair_identique_entre_A_et_B_prime_cas_de_controle():
+    # Cas de contrôle B' (D=q) : même sous-jacent qu'A trajectoire par trajectoire,
+    # donc même coupon au pair (aux résidus numériques du solveur près, pas un
+    # écart Monte Carlo puisque ce sont les mêmes trajectoires).
+    res = _indices(nb_sim=40_000)
+    spots_A = res["A"][:, 1:]
+    B_prime_obs = indice_decrement_pourcentage(res["U"], res["t_obs"], D=Q)[:, 1:]
+
+    coupon_A, _ = resoudre_coupon_pair(spots_A, S0, R, DATES_OBS, 1.0, BARRIERE_CAP)
+    coupon_B_prime, _ = resoudre_coupon_pair(B_prime_obs, S0, R, DATES_OBS, 1.0, BARRIERE_CAP)
+
+    assert coupon_A == pytest.approx(coupon_B_prime, abs=1e-6)
 
 
 def test_pdi_actif_seulement_a_maturite_sous_la_barriere():

@@ -85,9 +85,24 @@ def simuler_indices(s0, r, q, sigma, D, K, T, nb_pas_an, dates_obs, nb_sim, seed
             C_obs[:, k + 1] = C_cur
 
     t_obs_complet = np.concatenate([[0.0], dates_obs])
-    B_obs = U_obs * np.exp(-D * t_obs_complet)[None, :]
+    B_obs = indice_decrement_pourcentage(U_obs, t_obs_complet, D)
 
     return {"t_obs": t_obs_complet, "A": A_obs, "U": U_obs, "B": B_obs, "C": C_obs}
+
+
+def indice_decrement_pourcentage(U_obs, t_obs, D):
+    """B_t = U_t * exp(-D*t), à partir des valeurs déjà simulées de l'indice
+    total return U (pas de re-simulation nécessaire : le décrément en % est un
+    multiplicateur déterministe appliqué à U).
+
+    Cas particulier notable (cas de contrôle B' de la Figure 2) : si D = q,
+    B_t = U_t * exp(-q*t) est identique, trajectoire par trajectoire, à
+    l'indice classique A (même construction : mêmes chocs, drift r-q). Le
+    mécanisme de décrément en % est donc, en lui-même, neutre — tout l'écart
+    entre B et A dans la Figure 2 vient du fait que D (5 %) est fixé
+    au-dessus du dividende réel q (3 %), pas du mécanisme en tant que tel.
+    """
+    return U_obs * np.exp(-D * np.asarray(t_obs))[None, :]
 
 
 def forward_theorique_decrement_points(s0, r, K, T, nb_pas_an):

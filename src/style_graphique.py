@@ -4,23 +4,37 @@ grille légère, labels en français."""
 
 import matplotlib.pyplot as plt
 
-# Palette cohérente pour les 4 cas comparés dans le mémoire (indices A/B/C et
-# variante à barrière dégressive). Réutilisée par les Figures 1, 2 et 3.
+# Palette cohérente pour les cas comparés dans le mémoire (indices A/B/C, leurs
+# variantes de contrôle B' et C', et la barrière dégressive). Réutilisée par
+# les Figures 1, 2 et 3.
 PALETTE = {
     "A": "#1f77b4",
     "B": "#ff7f0e",
     "C": "#2ca02c",
     "A_degressive": "#9467bd",
+    "B_prime": "#17becf",
+    "C_prime": "#bcbd22",
 }
 
 LIBELLES = {
     "A": "A — Indice classique",
-    "B": "B — Décrément % (5 %/an)",
+    "B": "B — Décrément % (D=5 %/an)",
     "C": "C — Décrément points (K=5)",
     "A_degressive": "A — Barrière dégressive",
+    "B_prime": "B′ — Décrément % (D=q=3 %, contrôle)",
+    "C_prime": "C — Décrément points + barrière dégressive",
 }
 
-ORDRE_CAS = ["A", "B", "C", "A_degressive"]
+LIBELLES_COURTS = {
+    "A": "A",
+    "B": "B (D=5 %)",
+    "C": "C",
+    "A_degressive": "A + dégr.",
+    "B_prime": "B′ (D=q)",
+    "C_prime": "C + dégr.",
+}
+
+ORDRE_CAS = ["A", "B", "B_prime", "C", "C_prime", "A_degressive"]
 
 
 def appliquer_style():

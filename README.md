@@ -179,8 +179,9 @@ et leurs sorties chiffrées réutilisables directement dans le texte.
 
 - `src/` : `marche.py` (paramètres marché), `simulation.py` (GBM générique, variables
   antithétiques), `indices.py` (indices A/B/C construits sur les mêmes chocs gaussiens,
-  barrière dégressive), `pricer_autocall.py` (pricer MC de l'autocall), `coupon_solver.py`
-  (coupon au pair par dichotomie de Brent), `style_graphique.py` / `reporting.py` (rendu).
+  cas de contrôle B′, barrière dégressive), `pricer_autocall.py` (pricer MC de
+  l'autocall), `coupon_solver.py` (coupon au pair par dichotomie de Brent),
+  `style_graphique.py` / `reporting.py` (rendu).
 - `scripts/` : un script par figure, qui écrit son PNG (300 dpi, `figures/`) et ses
   résultats numériques (`figures/*.csv` et `.md`).
 - `tests/` : pytest (convergence, parités, cas limites — voir plus bas).
@@ -208,6 +209,43 @@ toucher de coupon**. Une partie de la hausse du coupon facial affichée par les 
 décrément compense donc explicitement ce risque de ne rien percevoir, et pas seulement
 le risque de perte en capital — c'est un point de lecture essentiel pour l'interprétation
 de la Figure 2, distinct de la seule probabilité d'activation du PDI.
+
+### Le coupon de 26,45 % du cas C n'est pas un niveau de marché
+
+Le coupon au pair obtenu pour l'indice à décrément en points (cas C, D implicite très
+supérieur à 5 % en fin de période) est de **26,45 %** — un niveau qui ne se rencontre pas
+en pratique sur ce type de produit. Ce n'est pas une anomalie du pricer : c'est la
+conséquence directe et attendue de la combinaison **décrément de 5 % + barrière de
+rappel constante à 100 %** sur 10 ans. Avec cette combinaison, le rappel devient de plus
+en plus improbable au fil des années (l'indice décroche mécaniquement de la barrière), le
+produit va très souvent jusqu'à maturité — et, du fait de la convention « à mémoire sans
+barrière de coupon indépendante » ci-dessus, ne verse alors aucun coupon. Le coupon
+facial doit donc devenir extrême pour compenser, sur les scénarios où le rappel a
+effectivement lieu, la probabilité élevée de n'en toucher aucun. **Ce chiffre est un
+résultat de démonstration, pas une proposition de structuration réaliste.**
+
+Deux cas supplémentaires isolent chacun un aspect de cette lecture :
+
+- **B′ — décrément en % avec D = q = 3 %** (cas de contrôle). En fixant le décrément
+  exactement au niveau du dividende réel de l'indice A, B′ est — trajectoire par
+  trajectoire, pas seulement en espérance — **identique à A** (voir
+  `src/indices.py::indice_decrement_pourcentage` et le test associé). Le coupon au pair
+  obtenu est rigoureusement le même que celui d'A (11,83 %). Cela isole l'effet du
+  *mécanisme* de décrément de l'effet « le décrément excède le dividende réel » : tout
+  l'écart entre B (17,92 %) et A vient des 2 points de décrément en trop (5 % contre 3 %
+  de dividende réel), pas du mécanisme en tant que tel.
+- **C′ — décrément en points + barrière dégressive** (−5 %/an, plancher 70 %), qui
+  correspond à la configuration réellement commercialisée en retail : le décrément seul
+  (cas C) rend le rappel trop improbable pour être vendable, la barrière dégressive le
+  compense en facilitant le rappel anticipé. Le coupon au pair retombe à **15,2 %**, à la
+  limite haute d'une fourchette de marché plausible (8–15 %), contre 26,45 % pour C seul.
+  La probabilité d'activation du PDI redescend également, de 31,8 % (C) à 20,0 % (C′),
+  mais reste supérieure à celle d'A (16,8 %) : la barrière dégressive atténue l'effet du
+  décrément sur le risque de perte en capital, elle ne l'annule pas. Fait notable, la
+  perte moyenne *conditionnelle* sachant activation du PDI est en revanche légèrement
+  plus élevée pour C′ (79,3 %) que pour C (73,9 %) : en rappelant plus tôt les scénarios
+  favorables, la barrière dégressive concentre les trajectoires survivant jusqu'à
+  maturité sur les scénarios les plus dégradés.
 
 ### Hypothèses de modélisation et leurs limites
 

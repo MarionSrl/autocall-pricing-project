@@ -2,13 +2,23 @@
 
 Compare, pour un autocall 10 ans / observations annuelles / PDI 60% à maturité :
     A             indice classique (price return)
-    B             indice à décrément en % (5%/an)
+    B             indice à décrément en % (D=5 %/an)
+    B_prime       indice à décrément en % avec D=q=3 % — cas de contrôle : isole
+                  l'effet du mécanisme de décrément de l'effet "D > q" (voir
+                  src/indices.py::indice_decrement_pourcentage). Doit donner le
+                  même coupon au pair qu'A (vérifié par les tests).
     C             indice à décrément en points (K=5, calibré à 5% de S0)
+    C_prime       indice C avec barrière de rappel dégressive (-5 %/an, plancher
+                  70 %) — configuration réellement commercialisée en retail : le
+                  décrément seul rend le rappel trop improbable (cf. C), la
+                  barrière dégressive compense.
     A_degressive  indice A avec barrière de rappel dégressive (-5%/an, plancher 70%)
 
 Pour chacun : coupon au pair (solveur Brent, trajectoires figées), distribution
-des dates de rappel, probabilité d'activation du PDI et perte moyenne
-conditionnelle. Écrit figures/figure2_autocall_vs_decrement.png (300 dpi) et
+des dates de rappel, probabilité d'activation du PDI, perte moyenne
+conditionnelle, et forward théorique à maturité de l'indice sous-jacent (la
+variable qui explique l'essentiel des écarts de coupon entre cas). Écrit
+figures/figure2_autocall_vs_decrement.png (300 dpi) et
 figures/figure2_resultats.{csv,md}.
 """
 
@@ -22,9 +32,14 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.indices import simuler_indices, barriere_degressive
+from src.indices import (
+    simuler_indices,
+    barriere_degressive,
+    indice_decrement_pourcentage,
+    forward_theorique_decrement_points,
+)
 from src.coupon_solver import resoudre_coupon_pair
-from src.style_graphique import appliquer_style, PALETTE, LIBELLES, ORDRE_CAS
+from src.style_graphique import appliquer_style, PALETTE, LIBELLES, LIBELLES_COURTS, ORDRE_CAS
 from src.reporting import ecrire_csv_et_md
 
 # ---------------------------------------------------------------------------
@@ -55,11 +70,33 @@ def construire_cas(indices):
     barriere_deg = barriere_degressive(
         DATES_OBS, niveau_initial=BARRIERE_AUTOCALL, baisse_annuelle=0.05, plancher=0.70
     )
+    # B' : décrément en % au niveau du dividende réel (D=q) — cas de contrôle,
+    # dérivé de U sans re-simulation (cf. indice_decrement_pourcentage).
+    B_prime_obs = indice_decrement_pourcentage(indices["U"], indices["t_obs"], D=Q)
     return {
         "A": (indices["A"][:, 1:], barriere_plate),
         "B": (indices["B"][:, 1:], barriere_plate),
+        "B_prime": (B_prime_obs[:, 1:], barriere_plate),
         "C": (indices["C"][:, 1:], barriere_plate),
+        "C_prime": (indices["C"][:, 1:], barriere_deg),
         "A_degressive": (indices["A"][:, 1:], barriere_deg),
+    }
+
+
+def forward_theorique_par_cas():
+    """Forward théorique à MATURITE de l'indice sous-jacent effectivement pricé
+    dans chaque cas (seule la barrière diffère pour A_degressive et C_prime,
+    donc même forward que leur cas de base A / C)."""
+    forward_A = S0 * np.exp((R - Q) * MATURITE)
+    forward_B = S0 * np.exp((R - D) * MATURITE)
+    forward_C = forward_theorique_decrement_points(S0, R, K, MATURITE, NB_PAS_AN)
+    return {
+        "A": forward_A,
+        "B": forward_B,
+        "B_prime": forward_A,   # D=q => identique à A (voir test dédié)
+        "C": forward_C,
+        "C_prime": forward_C,   # même sous-jacent C, seule la barrière change
+        "A_degressive": forward_A,
     }
 
 
@@ -82,6 +119,7 @@ def main():
     print(f"  -> simulation terminée en {time.time() - t0:.1f}s")
 
     cas = construire_cas(indices)
+    forward_par_cas = forward_theorique_par_cas()
 
     lignes = []
     resultats = {}
@@ -103,6 +141,7 @@ def main():
 
         ligne = {
             "cas": LIBELLES[nom],
+            "forward_theorique_10y": forward_par_cas[nom],
             "coupon_pair_pct": coupon_pair * 100,
             "prix_verif_pct": resultat.prix * 100,
             "erreur_std_mc_pct": resultat.erreur_std * 100,
@@ -114,7 +153,8 @@ def main():
             ligne[f"proba_rappel_t{int(t)}_pct"] = proba_rappel[t] * 100
         lignes.append(ligne)
         print(f"  {nom:15s} coupon au pair = {coupon_pair * 100:5.2f}%  "
-              f"(prix vérif = {resultat.prix * 100:.2f}%, erreur std {resultat.erreur_std * 100:.3f}%)")
+              f"(forward 10y = {forward_par_cas[nom]:.1f}, "
+              f"prix vérif = {resultat.prix * 100:.2f}%, erreur std {resultat.erreur_std * 100:.3f}%)")
 
     df = pd.DataFrame(lignes)
     os.makedirs(REPERTOIRE_FIGURES, exist_ok=True)
@@ -126,47 +166,50 @@ def main():
 
 def tracer_figure(resultats):
     appliquer_style()
-    fig, axes = plt.subplots(2, 2, figsize=(11, 8))
+    fig, axes = plt.subplots(2, 2, figsize=(12, 9))
 
     noms = ORDRE_CAS
     couleurs = [PALETTE[n] for n in noms]
     libelles = [LIBELLES[n] for n in noms]
+    libelles_courts = [LIBELLES_COURTS[n] for n in noms]
+    n_cas = len(noms)
 
     # (a) coupon au pair
     ax = axes[0, 0]
     coupons = [resultats[n]["coupon_pair"] * 100 for n in noms]
-    ax.bar(libelles, coupons, color=couleurs)
+    ax.bar(libelles_courts, coupons, color=couleurs)
     ax.set_ylabel("Coupon annuel au pair (%)")
-    ax.tick_params(axis="x", rotation=20)
+    ax.tick_params(axis="x", rotation=25)
 
     # (b) distribution des dates de rappel + probabilité d'aller à maturité
     ax = axes[0, 1]
-    largeur = 0.2
+    largeur = 0.8 / n_cas
     x_dates = np.arange(len(DATES_OBS) + 1)
     etiquettes_x = [f"t={int(t)}" for t in DATES_OBS] + ["maturité"]
     for i, n in enumerate(noms):
         proba_rappel = resultats[n]["proba_rappel"]
         proba_maturite = resultats[n]["proba_maturite"]
         valeurs = [proba_rappel[t] * 100 for t in DATES_OBS] + [proba_maturite * 100]
-        ax.bar(x_dates + (i - 1.5) * largeur, valeurs, width=largeur, color=PALETTE[n], label=libelles[i])
+        decalage = (i - (n_cas - 1) / 2) * largeur
+        ax.bar(x_dates + decalage, valeurs, width=largeur, color=PALETTE[n], label=libelles[i])
     ax.set_xticks(x_dates)
     ax.set_xticklabels(etiquettes_x, rotation=45, ha="right")
     ax.set_ylabel("Probabilité (%)")
-    ax.legend(fontsize=7, loc="upper left")
+    ax.legend(fontsize=6.5, loc="upper right")
 
     # (c) probabilité d'activation du PDI
     ax = axes[1, 0]
     probas_pdi = [resultats[n]["proba_pdi"] * 100 for n in noms]
-    ax.bar(libelles, probas_pdi, color=couleurs)
+    ax.bar(libelles_courts, probas_pdi, color=couleurs)
     ax.set_ylabel("Probabilité d'activation du PDI (%)")
-    ax.tick_params(axis="x", rotation=20)
+    ax.tick_params(axis="x", rotation=25)
 
     # (d) perte moyenne conditionnelle sachant activation du PDI
     ax = axes[1, 1]
     pertes = [resultats[n]["perte_cond"] * 100 for n in noms]
-    ax.bar(libelles, pertes, color=couleurs)
+    ax.bar(libelles_courts, pertes, color=couleurs)
     ax.set_ylabel("Perte moy. conditionnelle sachant\nactivation du PDI (%)")
-    ax.tick_params(axis="x", rotation=20)
+    ax.tick_params(axis="x", rotation=25)
 
     fig.tight_layout()
     chemin = os.path.join(REPERTOIRE_FIGURES, "figure2_autocall_vs_decrement.png")
