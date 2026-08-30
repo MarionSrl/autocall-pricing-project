@@ -213,5 +213,4 @@ résultats à retenir et à généraliser.
 
 ## Auteur
 
-Projet réalisé dans le cadre du cours Produits Structurés — M2 BFA (Dauphine), par
-Juliette Colombani, Violaine Mencke, Mathilde Largarde et Marion Sirol.
+Projet réalisé dans le cadre de mon mémoire de fin d'étude - basé sur le projet fait en cours de Produits Structurés — M2 BFA (Dauphine), par Marion Sirol.
