@@ -9,7 +9,7 @@ Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV p
 | Delta du PDI juste sous la barrière (spot=59.99) | -0.97 |
 | Delta du PDI juste au-dessus de la barrière (spot=60.01) | -2.52 |
 | Spot où le vega total de l'autocall s'annule | 71.05 |
-| Vega total à ce spot (résiduel MC, erreur std 1.65 pt) | -0.00 % |
+| Vega total à ce spot (résiduel MC, erreur std 0.02 pt) | -0.00 % |
 
 ## Figure B — Autocall classique vs décrément
 

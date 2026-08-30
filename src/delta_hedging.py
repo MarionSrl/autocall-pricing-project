@@ -42,7 +42,7 @@ n'est PAS le gamma "de position" de l'émetteur. Sur le produit de la Figure D,
 gamma_$ est négatif (f est concave près du spot initial : l'investisseur est
 structurellement "court" l'optionalité de barrière -- le put down-and-in --
 cédée à l'émetteur en échange du coupon), tout comme le vega de l'autocall en
-Figure A est négatif au spot initial du produit de référence (-68.40 pt de %,
+Figure A est négatif au spot initial du produit de référence (-0.68 pt de %,
 cf. figures/figureA_autocall_vega.csv) : même sous-jacent économique, même
 signe, deux figures cohérentes. Avec gamma_$ négatif, la formule ci-dessus
 prédit -- et la simulation confirme -- un P&L de couverture CROISSANT avec la

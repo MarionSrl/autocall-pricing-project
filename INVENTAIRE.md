@@ -15,9 +15,9 @@ qui reste.
 |---|---|---|---|
 | (a) Prix du PDI | x = spot (% niveau initial), y = prix | spot 40→130, courbe unique | Le prix du PDI décroît de ~59 (spot 40) à ~0 (spot 100+) ; niveau du prix pour situer les autres panneaux |
 | (b) Delta du PDI | x = spot, y = delta | spot 40→130 | Delta ≈ −0.97 sous la barrière (60), **saut discontinu** à ≈ −2.52 juste au-dessus, puis remonte vers 0. C'est LE panneau qui porte la discontinuité de sensibilité |
-| (c) Vega du PDI | x = spot, y = vega (pour 1pt de vol) | spot 40→130, vega ≈0→115 | Vega nul sous la barrière (option déjà "in", devenue put vanille profondément ITM), pic ~115 vers spot 70-75, puis décroît — **jamais négatif** sur toute la grille |
-| (d) Vanna du PDI | x = spot, y = vanna | spot 40→130 | Saut à la barrière (≈+15 juste au-dessus), signe qui change ensuite (creux négatif vers spot 80) |
-| (e) Vega de l'autocall complet | x = spot (40→130, pas 5), y = vega total (%, pour 1pt de vol), 3 courbes (total, jambe sans PDI, −jambe PDI) | vega total de +48 (spot 40) à −68 (spot 100) puis remonte | Le vega total **change de signe** (zéro à spot≈71.05), contrairement au panneau (c) — démontre l'opposition des deux jambes |
+| (c) Vega du PDI | x = spot, y = vega (pour 1pt de vol) | spot 40→130, vega ≈0→1.15 | Vega nul sous la barrière (option déjà "in", devenue put vanille profondément ITM), pic ~1.15 vers spot 70-75, puis décroît — **jamais négatif** sur toute la grille |
+| (d) Vanna du PDI | x = spot, y = vanna | spot 40→130 | Saut à la barrière (≈+0.15 juste au-dessus), signe qui change ensuite (creux négatif vers spot 80) |
+| (e) Vega de l'autocall complet | x = spot (40→130, pas 5), y = vega total (%, pour 1pt de vol), 3 courbes (total, jambe sans PDI, −jambe PDI) | vega total de +0.48 (spot 40) à −0.68 (spot 100) puis remonte | Le vega total **change de signe** (zéro à spot≈71.05), contrairement au panneau (c) — démontre l'opposition des deux jambes |
 
 **Redondance avec `RESULTATS.md`** : seuls 3 chiffres du panneau (b) et (e) sont repris en table (delta juste sous/sur la barrière, spot où le vega s'annule). Les courbes complètes (361 points pour a-d, 19 points pour e) ne sont nulle part ailleurs sous forme de table lisible — **ce sont les panneaux qui portent le plus d'information non dupliquée**.
 
@@ -63,7 +63,7 @@ Par ordre de "coupable sans perte d'information" : Figure B (a) > Figure B (c)/(
 
 | Fichier | Colonnes | Reprises dans `RESULTATS.md` ? | Chiffres calculés mais inaccessibles ailleurs qu'au fichier ou au log |
 |---|---|---|---|
-| `figureA_pdi_formule_fermee.csv` (361 lignes) | spot, prix, delta, vega, vanna | Non (sauf 2 points de delta, cités séparément) | Toute la courbe : ex. le pic de vega (~115, vers spot 72), le creux de vanna (~−5.4 vers spot 80) ne sont cités nulle part en texte |
+| `figureA_pdi_formule_fermee.csv` (361 lignes) | spot, prix, delta, vega, vanna | Non (sauf 2 points de delta, cités séparément) | Toute la courbe : ex. le pic de vega (~1.15, vers spot 72), le creux de vanna (~−0.056 vers spot 80) ne sont cités nulle part en texte |
 | `figureA_pdi_formule_fermee_resume.csv` (47 lignes) | idem, sous-échantillon à spots ronds | Non | Table de référence prête à copier (spots 40,50,...,130 + H, K) — jamais citée |
 | `figureA_delta_discontinuite.csv` | spot, position, delta | Oui (les 2 valeurs) | — |
 | `figureA_spot_zero_vega.csv` | spot_zero_vega, vega_pct, erreur_std_pct | Oui | — |

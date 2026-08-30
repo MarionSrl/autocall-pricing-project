@@ -246,7 +246,7 @@ def main():
         "Figure A -- aucun changement de perspective entre les deux figures), pas un "
         "gamma \"de position\" de l'émetteur. Il est négatif ici : f est concave près "
         "du spot initial, cohérent avec le vega négatif de l'autocall en Figure A "
-        "(-68.40 pt de % au spot initial du produit de référence, `figureA_autocall_vega.csv`) "
+        "(-0.68 pt de % au spot initial du produit de référence, `figureA_autocall_vega.csv`) "
         "-- même sous-jacent économique (le put down-and-in cédé par l'investisseur à "
         "l'émetteur). Un gamma_f négatif inverse le signe usuel de la formule de "
         "gamma-trading par rapport au cas manuel d'un vendeur d'option vanille "

@@ -77,7 +77,15 @@ def put_down_and_out(S, K, H, r, q, sigma, T):
 
 def pdi_grecques(S, K, H, r, q, sigma, T, h_spot_rel=1e-3, h_vol=1e-3):
     """Prix, delta, vega et vanna du PDI par différences finies centrées sur la
-    formule fermée (vanna = dérivée croisée ∂²P/∂S∂σ)."""
+    formule fermée (vanna = dérivée croisée ∂²P/∂S∂σ).
+
+    Convention vega/vanna (à ne pas casser) : sigma est en décimal (0.18 =
+    18 %). `h_vol` n'est qu'un pas de différenciation numérique (petit, pour
+    la précision de la dérivée) -- vega et vanna sont ensuite mis à l'échelle
+    par 0.01 (= 1 point de vol) pour représenter la variation de prix pour un
+    déplacement de 1 point de vol (convention desk), et non la dérivée brute
+    ∂P/∂σ extrapolée sur un déplacement complet de sigma de 0 à 1 (100
+    points), qui serait 100x trop grande."""
     S = np.asarray(S, dtype=float)
     hS = S * h_spot_rel
     hv = h_vol
@@ -86,10 +94,10 @@ def pdi_grecques(S, K, H, r, q, sigma, T, h_spot_rel=1e-3, h_vol=1e-3):
     delta = (
         put_down_and_in(S + hS, K, H, r, q, sigma, T) - put_down_and_in(S - hS, K, H, r, q, sigma, T)
     ) / (2 * hS)
-    vega = (
+    vega = 0.01 * (
         put_down_and_in(S, K, H, r, q, sigma + hv, T) - put_down_and_in(S, K, H, r, q, sigma - hv, T)
     ) / (2 * hv)
-    vanna = (
+    vanna = 0.01 * (
         put_down_and_in(S + hS, K, H, r, q, sigma + hv, T)
         - put_down_and_in(S + hS, K, H, r, q, sigma - hv, T)
         - put_down_and_in(S - hS, K, H, r, q, sigma + hv, T)

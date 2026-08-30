@@ -103,7 +103,7 @@ dans **[`RESULTATS.md`](RESULTATS.md)**.
   changement de perspective entre les deux figures. Ce gamma est négatif ici (f est
   concave près du spot initial : l'investisseur est structurellement « court »
   l'optionalité de barrière — le put down-and-in — cédée à l'émetteur en échange du
-  coupon), cohérent avec le vega négatif de l'autocall en Figure A (-68,40 pt de % au
+  coupon), cohérent avec le vega négatif de l'autocall en Figure A (-0,68 pt de % au
   spot initial du produit de référence, `figureA_autocall_vega.csv`) : même sous-jacent
   économique, même signe. Avec un gamma négatif, la formule `dPnL_émetteur ≈
   ½Γ_f·S²·(σ_modèle² − σ_réalisée²)·dt` prédit — et la simulation confirme — un PnL de
