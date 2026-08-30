@@ -9,28 +9,37 @@ qui reste.
 
 ## 1. Inventaire des sorties graphiques existantes
 
-### `figureA_sensibilites_pdi_autocall.png` (5 panneaux)
+### `figureA_sensibilites_pdi_autocall.png` (4 panneaux)
+
+Fusionnée depuis la version à 5 panneaux (prix et vega du PDI étaient deux
+panneaux séparés) à la demande explicite de l'utilisatrice, une fois le
+panneau vanna confirmé comme cité dans le mémoire (III.1.1, changement de
+signe au voisinage de 73 % et lien avec le forward) — donc conservé, pas coupé.
 
 | Panneau | Axes / séries | Plage | Ce qu'il démontre |
 |---|---|---|---|
-| (a) Prix du PDI | x = spot (% niveau initial), y = prix | spot 40→130, courbe unique | Le prix du PDI décroît de ~59 (spot 40) à ~0 (spot 100+) ; niveau du prix pour situer les autres panneaux |
+| (a) Prix + vega du PDI (deux échelles) | x = spot (% niveau initial), y gauche = prix, y droite = vega (pour 1pt de vol) | prix ~59→0, vega ≈0→1.15 | Le prix du PDI décroît de ~59 (spot 40) à ~0 (spot 100+) ; le vega, nul sous la barrière (option déjà "in", devenue put vanille profondément ITM), culmine ~1.15 vers spot 70-75 puis décroît — **jamais négatif** sur toute la grille |
 | (b) Delta du PDI | x = spot, y = delta | spot 40→130 | Delta ≈ −0.97 sous la barrière (60), **saut discontinu** à ≈ −2.52 juste au-dessus, puis remonte vers 0. C'est LE panneau qui porte la discontinuité de sensibilité |
-| (c) Vega du PDI | x = spot, y = vega (pour 1pt de vol) | spot 40→130, vega ≈0→1.15 | Vega nul sous la barrière (option déjà "in", devenue put vanille profondément ITM), pic ~1.15 vers spot 70-75, puis décroît — **jamais négatif** sur toute la grille |
-| (d) Vanna du PDI | x = spot, y = vanna | spot 40→130 | Saut à la barrière (≈+0.15 juste au-dessus), signe qui change ensuite (creux négatif vers spot 80) |
-| (e) Vega de l'autocall complet | x = spot (40→130, pas 5), y = vega total (%, pour 1pt de vol), 3 courbes (total, jambe sans PDI, −jambe PDI) | vega total de +0.48 (spot 40) à −0.68 (spot 100) puis remonte | Le vega total **change de signe** (zéro à spot≈71.05), contrairement au panneau (c) — démontre l'opposition des deux jambes |
+| (c) Vanna du PDI | x = spot, y = vanna | spot 40→130 | Saut à la barrière (≈+0.15 juste au-dessus), signe qui change ensuite (creux négatif vers spot 80) |
+| (d) Vega de l'autocall complet | x = spot (40→130, pas 5), y = vega total (%, pour 1pt de vol), 3 courbes (total, jambe sans PDI, −jambe PDI) | vega total de +0.48 (spot 40) à −0.68 (spot 100) puis remonte | Le vega total **change de signe** (zéro à spot≈71.05), contrairement au panneau (a) — démontre l'opposition des deux jambes |
 
-**Redondance avec `RESULTATS.md`** : seuls 3 chiffres du panneau (b) et (e) sont repris en table (delta juste sous/sur la barrière, spot où le vega s'annule). Les courbes complètes (361 points pour a-d, 19 points pour e) ne sont nulle part ailleurs sous forme de table lisible — **ce sont les panneaux qui portent le plus d'information non dupliquée**.
+**Redondance avec `RESULTATS.md`** : seuls le delta juste sous/sur la barrière, le spot où le vega s'annule, et les deux validations de la formule fermée (parité KI+KO, convergence MC) sont repris en table. Les courbes complètes (361 points pour a-c, 19 points pour d) ne sont nulle part ailleurs sous forme de table lisible — **ce sont les panneaux qui portent le plus d'information non dupliquée**.
 
-### `figureB_autocall_vs_decrement.png` (4 panneaux, 6 cas : A, B, B′, C, C′, A+dégressive)
+### `figureB_autocall_vs_decrement.png` (3 panneaux, 6 cas : A, B, B′, C, C′, A+dégressive)
+
+Fusionnée depuis la version à 4 panneaux (probabilité PDI et perte
+conditionnelle étaient deux panneaux séparés) à la demande explicite de
+l'utilisatrice — barres groupées sur un axe de pourcentage partagé (les deux
+grandeurs sont déjà des %, un double axe aurait été moins honnête qu'un axe
+commun).
 
 | Panneau | Axes / séries | Ce qu'il démontre |
 |---|---|---|
 | (a) Coupon au pair | x = 6 cas, y = coupon (%), barres | Classement visuel des 6 coupons (6.68% à 26.45%) |
 | (b) Distribution des dates de rappel | x = t=1...t=10 + "maturité" (11 groupes), y = probabilité (%), 6 séries de barres groupées | Le décrément (B, C) décale la masse de probabilité vers "maturité" ; la barrière dégressive (A+dégr., C′) la ramène vers les premières dates |
-| (c) Probabilité d'activation du PDI | x = 6 cas, y = proba (%), barres | Classement visuel du risque de perte en capital par cas |
-| (d) Perte moyenne conditionnelle | x = 6 cas, y = perte (%), barres | Sévérité de la perte quand le PDI est activé, par cas |
+| (c) Risque : probabilité d'activation du PDI + perte moyenne conditionnelle | x = 6 cas, y = pourcentage, barres groupées (2 séries) | Le décrément augmente aussi le risque de perte en capital (9.1%→31.8% de probabilité) et sa sévérité (58.6%→79.3% de perte conditionnelle) — la hausse de coupon n'est pas gratuite |
 
-**Redondance avec `RESULTATS.md`** : les panneaux (a), (c) et (d) sont **chacun une simple mise en barres d'une colonne déjà présente telle quelle dans la table `RESULTATS.md`** (coupon_pair, proba_pdi_actif, perte_moyenne_cond) — value ajoutée = lisibilité comparative, pas d'information nouvelle. Le panneau (b), en revanche, est **la seule sortie graphique ou tabulaire qui montre la répartition par date** (t1...t10) : le CSV complet a ces colonnes, mais `RESULTATS.md` n'affiche que l'agrégat "proba rappel avant maturité". Si un panneau doit être coupé pour gagner de la place, (a), (c) ou (d) sont les candidats naturels ; (b) est le plus informatif.
+**Redondance avec `RESULTATS.md`** : les panneaux (a) et (c) sont **chacun une mise en barres de colonnes déjà présentes telles quelles dans la table `RESULTATS.md`** (coupon_pair, proba_pdi_actif, perte_moyenne_cond) — valeur ajoutée = lisibilité comparative, pas d'information nouvelle. Le panneau (b), en revanche, est **la seule sortie graphique ou tabulaire qui montre la répartition par date** (t1...t10) : le CSV complet a ces colonnes, mais `RESULTATS.md` n'affiche que l'agrégat "proba rappel avant maturité".
 
 ### `figureC_volatility_target.png` (3 panneaux)
 
@@ -55,7 +64,7 @@ qui reste.
 
 ### Synthèse — que couper si besoin de place
 
-Par ordre de "coupable sans perte d'information" : Figure B (a) > Figure B (c)/(d) > rien d'autre. Tous les autres panneaux (Figure A en totalité, Figure B(b), Figure C en totalité, Figure D en totalité) portent une information que aucune table ne reproduit.
+Les deux fusions à faible coût identifiées ont été appliquées à la demande de l'utilisatrice : Figure A (prix+vega du PDI sur un même panneau à deux échelles, 5→4 panneaux) et Figure B (probabilité PDI + perte conditionnelle en barres groupées, 4→3 panneaux). Le vanna (Figure A) est conservé : cité dans le mémoire (III.1.1). Au-delà de ces deux fusions déjà faites, aucun panneau restant n'est identifié comme candidat à la coupe : chacun porte une information que aucune table ne reproduit.
 
 ---
 
@@ -68,15 +77,16 @@ Par ordre de "coupable sans perte d'information" : Figure B (a) > Figure B (c)/(
 | `figureA_delta_discontinuite.csv` | spot, position, delta | Oui (les 2 valeurs) | — |
 | `figureA_spot_zero_vega.csv` | spot_zero_vega, vega_pct, erreur_std_pct | Oui | — |
 | `figureA_autocall_vega.csv` (19 lignes) | spot, prix, erreur_std_prix_pct, vega_total_pct, erreur_std_vega_total_pct, vega_leg_sans_pdi_pct, vega_leg_pdi_pct | Non (seul le zéro dérivé séparément) | Le prix de l'autocall par spot (colonne `prix`, ex. 34.46 à spot 40, 108.07 à spot 130) et la décomposition complète des deux jambes par spot ne sont citées nulle part |
-| `figureA_validations.csv` (7 lignes) | validation, resultat, reference, ecart_relatif_pct | Non | Les écarts KI+KO (nuls) et l'écart MC vs formule fermée (0.25%) ne figurent plus dans le README depuis sa simplification — disponibles seulement ici |
+| `figureA_validations.csv` (7 lignes) | validation, resultat, reference, ecart_relatif_pct | Oui (résumé : écart max parité KI+KO, écart MC vs formule fermée) | Le détail des 6 écarts de parité individuels (tous nuls) reste seulement dans ce fichier — RESULTATS.md n'en cite que le max |
 | `figureB_resultats.csv` (6 lignes) | cas, forward_theorique_10y, coupon_pair_pct, prix_verif_pct, erreur_std_mc_pct, proba_maturite_pct, proba_pdi_actif_pct, perte_moyenne_cond_pct, proba_rappel_t1...t10_pct | Partiellement (6 des ~17 colonnes) | **Les 10 colonnes `proba_rappel_t1...t10`** (probabilité de rappel à *chaque* date d'observation, par cas) ne sont reprises ni en table ni en texte — seul le graphique (b) les montre visuellement |
-| `figureC_distribution_vol_realisee.csv` | sigma_cible_pct, vol_realisee_moyenne_pct, vol_realisee_mediane_pct, vol_realisee_ecart_type_pct, proba_dans_plus_ou_moins_2pt_pct | Partiellement (1 des 5) | La **médiane** (16.03%), l'**écart-type** (1.31 pt) et la **probabilité d'être dans ±2pt de la cible** (76%) sont calculés mais ne sont dans aucune table du mémoire |
-| `figureC_scenario_v.csv` (187 lignes) | jour, indice_nu, indice_vt_20j, exposition_20j_pct, indice_vt_60j, exposition_60j_pct | Non (le résumé seul l'est) | Le **creux minimal** de l'indice VT pendant la chute (visible dans le graphique, ~64-67 selon la fenêtre) n'est calculé nulle part comme chiffre isolé — il faudrait l'extraire de ce CSV (`.min()`) |
-| `figureC_scenario_v_resume.csv` | fenetre_jours, niveau_indice_nu_fin_rebond, niveau_indice_vt_fin_rebond, sous_participation_pts, niveau_indice_vt_fin_episode | Oui (sous_participation + écart fin épisode) | — |
-| `figureC_trajectoire_type.csv` (1261 lignes) | annee, indice_sous_jacent, indice_vt, exposition_pct | Non | Aucune statistique de synthèse n'est calculée sur cette trajectoire (ex. % du temps à l'exposition plafond, écart final indice nu vs VT sur 5 ans) — tout est dans le graphique uniquement |
-| `figureD_pnl_vs_vol_realisee.csv` (4 lignes) | vol_realisee_pct, pnl_moyen, pnl_erreur_std, nb_trajectoires, pnl_theorique | Oui (pnl_moyen et pnl_theorique) | `pnl_erreur_std` (précision de chaque point, ~0.14 à 0.30) n'est pas repris en table |
-| `figureD_resume.csv` | gamma_moyen_dollar, gamma_s2_moyen, temps_sortie_moyen_annees, prix_initial_pct, nb_trajectoires_grille_delta, nb_trajectoires_couverture_par_scenario, coupon_pct, maturite_annees, vol_modele_pct | Oui (gamma_moyen_dollar, temps_sortie_moyen_annees, prix_initial_pct, les 2 nb_trajectoires) | `gamma_s2_moyen` (la quantité gamma×spot² réellement utilisée pour la courbe théorique, plus précise que gamma_moyen×S0²) n'est pas commentée en texte |
-| `figureD_pnl_vs_frequence.csv` (4 lignes) | freq_rebal_jours, pnl_moyen, pnl_ecart_type, pnl_erreur_std, nb_trajectoires | Oui (pnl_moyen, pnl_ecart_type) | — |
+| `figureC_distribution_vol_realisee.csv` | sigma_cible_pct, vol_realisee_moyenne_pct, vol_realisee_mediane_pct, vol_realisee_ecart_type_pct, proba_dans_plus_ou_moins_2pt_pct | Oui (5 des 5) | — |
+| `figureC_scenario_v.csv` (187 lignes) | jour, indice_nu, indice_vt_20j, exposition_20j_pct, indice_vt_60j, exposition_60j_pct | Non (le résumé seul l'est) | La trajectoire jour par jour reste seulement dans ce fichier / le graphique — le creux (niveau_plancher_*) est désormais calculé dans `figureC_scenario_v_resume.csv` et cité |
+| `figureC_scenario_v_resume.csv` | fenetre_jours, niveau_indice_nu_fin_rebond, niveau_indice_vt_fin_rebond, sous_participation_pts, niveau_indice_vt_fin_episode, niveau_plancher_indice_nu, niveau_plancher_indice_vt | Oui (sous_participation, écart fin épisode, et désormais les 2 planchers) | — |
+| `figureC_trajectoire_type.csv` (1261 lignes) | annee, indice_sous_jacent, indice_vt, exposition_pct | Non | La trajectoire jour par jour reste seulement dans ce fichier / le graphique — le % de temps au plafond est désormais calculé dans `figureC_trajectoire_type_resume.csv` et cité ; l'écart final indice nu vs VT n'est pas repris (chiffre à un seul chemin, moins généralisable que les moyennes de la sortie 2) |
+| `figureC_trajectoire_type_resume.csv` (nouveau) | pct_temps_exposition_plafond | Oui | — |
+| `figureD_pnl_vs_vol_realisee.csv` (4 lignes) | vol_realisee_pct, pnl_moyen, pnl_erreur_std, nb_trajectoires, pnl_theorique | Oui (pnl_moyen, pnl_erreur_std, pnl_theorique) | — |
+| `figureD_resume.csv` | gamma_moyen_dollar, gamma_s2_moyen, temps_sortie_moyen_annees, prix_initial_pct, nb_trajectoires_grille_delta, nb_trajectoires_couverture_par_scenario, coupon_pct, maturite_annees, vol_modele_pct | Oui (gamma_moyen_dollar, gamma_s2_moyen, temps_sortie_moyen_annees, prix_initial_pct, les 2 nb_trajectoires) | — |
+| `figureD_pnl_vs_frequence.csv` (4 lignes) | freq_rebal_jours, pnl_moyen, pnl_ecart_type, pnl_erreur_std, nb_trajectoires | Oui (pnl_moyen, pnl_ecart_type, pnl_erreur_std) | — |
 | `figureD_pnl_vs_frequence_brut.csv` (8000 lignes) | freq_rebal_jours, pnl | Non (résumé seul) | La distribution complète (asymétrie, queues épaisses visibles sur le boxplot) n'est décrite que visuellement, jamais quantifiée (skewness, quantiles) |
 
 ### Chiffres disponibles auxquels tu n'as pas accès aujourd'hui (hors CSV/graphique)
@@ -84,10 +94,9 @@ Par ordre de "coupable sans perte d'information" : Figure B (a) > Figure B (c)/(
 Ce sont des nombres déjà calculés par les scripts, visibles seulement dans les logs de `run_all.py` ou dans les CSV bruts, et absents de tout document de synthèse actuel :
 
 1. **Les 10 probabilités de rappel par date, par cas** (Figure B) — 60 chiffres au total, seulement visualisés, jamais tabulés en dehors du CSV brut.
-2. **Validations de la Figure A** (KI+KO=vanille, convergence MC à 0.25%) — disponibles dans `figureA_validations.md` mais plus citées dans le README depuis sa simplification.
-3. **Médiane et écart-type de la vol réalisée VT**, et **probabilité d'être proche de la cible** (Figure C).
-4. **Le creux exact de l'indice VT pendant le scénario V** (utile pour quantifier l'effet de sur-exposition avant le choc, actuellement seulement qualitatif dans le texte).
-5. **Le prix complet de l'autocall par spot** (panneau e de la Figure A) — seule la localisation du zéro de vega est citée, pas le niveau de prix associé.
+2. **Le prix complet de l'autocall par spot** (panneau d de la Figure A) — seule la localisation du zéro de vega est citée, pas le niveau de prix associé.
+
+Les autres éléments listés dans une version antérieure de cet inventaire (validations de la Figure A, médiane/écart-type/proba ±2pt de la vol réalisée VT, creux du scénario V, % de temps à l'exposition plafond, `gamma_s2_moyen`, erreurs std du PnL de la Figure D) sont désormais dans `RESULTATS.md`.
 
 ---
 
@@ -206,13 +215,13 @@ place (`simuler_indices`, `pricer_autocall`, `coupon_solver`, `barrier_options`,
 
 | Idée | Effort | Intérêt pour le mémoire | Verdict |
 |---|---|---|---|
-| **Vega/delta de l'autocall à plusieurs maturités résiduelles** (rejouer le panneau (e) de la Figure A en tronquant `dates_obs`, ex. 10 ans à l'origine vs 5 ans vs 1 an restant) | Faible — boucle autour du code déjà écrit | Élevé — démontre explicitement le point non montré à ce jour : le vega change de signe *aussi* selon la maturité résiduelle (mentionné dans le README mais jamais illustré) | **À faire** |
+| **Vega/delta de l'autocall à plusieurs maturités résiduelles** (rejouer le panneau (d) de la Figure A en tronquant `dates_obs`, ex. 10 ans à l'origine vs 5 ans vs 1 an restant) | Faible — boucle autour du code déjà écrit | Élevé — démontre explicitement le point non montré à ce jour : le vega change de signe *aussi* selon la maturité résiduelle (mentionné dans le README mais jamais illustré) | **À faire** |
 | **Sensibilité du coupon au pair (cas A/B/C) à σ et r** (reboucler `coupon_solver` + `simuler_indices` sur une grille de volatilités/taux) | Faible-moyen — code identique, juste répété sur une grille de paramètres marché ; coût de calcul cumulé notable (chaque point ≈ 50s à pleine précision, réductible avec moins de trajectoires pour une sensibilité) | Moyen-élevé — robustesse de la thèse de la Figure B face à l'hypothèse de marché | **À faire si le temps le permet** |
 | **Sensibilité du coupon à la pente/plancher de la barrière dégressive** (reboucler `barriere_degressive` + `coupon_solver`) | Faible | Moyen — approfondit la comparaison C′ vs A+dégressive déjà présente | Optionnel |
-| **PDI fermé à plusieurs maturités** (courbes delta/vega du panneau (a)-(d) pour T=0.5/1/2/5 ans) | Faible — un paramètre à boucler dans `pdi_grecques` | Moyen — illustre la structure par terme des sensibilités du PDI | Optionnel |
+| **PDI fermé à plusieurs maturités** (courbes prix/delta/vega/vanna du panneau (a)-(c) pour T=0.5/1/2/5 ans) | Faible — un paramètre à boucler dans `pdi_grecques` | Moyen — illustre la structure par terme des sensibilités du PDI | Optionnel |
 | **Sensibilité de l'indice C au paramètre K** (décrément en points) | Faible | Moyen — approfondit le point de vigilance déjà démontré (K=5 donne un coupon extrême) | Optionnel |
 | **Sensibilité de l'indice VT à σ_cible et L_max** (rejouer sortie 2/3 de la Figure C avec d'autres valeurs) | Faible-moyen | Moyen — renforce III.3.2 (le biais dépend des paramètres de construction, pas seulement du mécanisme) | Optionnel |
-| **Statistique de synthèse manquantes du §2** (creux du scénario V, % de temps au plafond L_max sur la trajectoire type, médiane/écart-type de la vol réalisée) | Très faible — extraction directe des CSV déjà produits, aucune nouvelle simulation | Faible-moyen — complète `RESULTATS.md` sans nouveau calcul | **À faire, c'est gratuit** |
+| ~~Statistique de synthèse manquantes du §2~~ (creux du scénario V, % de temps au plafond L_max sur la trajectoire type, médiane/écart-type de la vol réalisée) | Très faible | Faible-moyen | **Fait** — dans `RESULTATS.md` |
 | **Heatmap delta/gamma(temps, spot)** (les grilles existent déjà dans `src/delta_hedging.py`, juste jamais tracées) | Très faible — `pcolormesh` + CSV, aucune nouvelle simulation | Faible-moyen — illustration d'appui pour la Figure D, pas indispensable | **À faire si le temps le permet, c'est presque gratuit** |
 | **Delta hedging sur le produit du mémoire (10 ans, coupon au pair)** (porter `src/delta_hedging.py` du produit notebook vers `src/pricer_autocall.py`) | Élevé — même module réutilisable, mais nouvelle grille + nouvelles simulations de couverture à faire tourner et valider | Élevé — chiffres directement comparables aux coupons de la Figure B | Reste "non peu coûteux" malgré la Figure D — voir §3 |
 | **Modèle de smile / skew de volatilité** | Élevé — nouveau moteur (vol locale ou stochastique calibrée) | — | **Pas rentable** dans le temps restant |
@@ -226,7 +235,7 @@ place (`simuler_indices`, `pricer_autocall`, `coupon_solver`, `barrier_options`,
 | Élément disponible | Ce qu'il démontre | Section du mémoire | Statut |
 |---|---|---|---|
 | Figure A, panneaux (a)-(d) — PDI fermé | Discontinuité de delta/vanna à la barrière ; vega de signe constant | III.1.1 | **Exploité** |
-| Figure A, panneau (e) — vega autocall | Vega change de signe (jambes opposées) | III.1.1 | **Exploité** |
+| Figure A, panneau (d) — vega autocall | Vega change de signe (jambes opposées) | III.1.1 | **Exploité** |
 | `figureA_validations.csv` (KI+KO, convergence MC) | Rigueur de la formule fermée | III.1.1 (annexe méthodo) | Disponible, non cité dans le README actuel |
 | Vega/delta à plusieurs maturités résiduelles | Le vega change de signe *aussi* selon la maturité | III.1.1 | À produire (effort faible, §4) |
 | Figure B, panneaux (a)(c)(d) — coupon, PDI, perte | Classement des 6 cas | III.1.3 | **Exploité** (redondant avec `RESULTATS.md`) |
@@ -240,7 +249,7 @@ place (`simuler_indices`, `pricer_autocall`, `coupon_solver`, `barrier_options`,
 | Delta hedging sur le produit du mémoire (10 ans, coupon au pair) | Idem, mais chiffres directement comparables à Figure B | III.2 | **À produire, effort élevé** (§3.1) — Figure D porte sur le produit 5 ans du notebook, pas ce produit-ci |
 | Figure C, trajectoire type | Exposition oscille entre plafond et désensibilisation | III.3.1 | **Exploité** |
 | Figure C, scénario V | Sur-réaction à la chute + sous-participation au rebond | III.3.1 | **Exploité** |
-| Creux exact du scénario V | Quantifie la sur-exposition avant le choc | III.3.1 | Disponible, non calculé comme chiffre isolé (§2, effort quasi nul) |
+| Creux exact du scénario V | Quantifie la sur-exposition avant le choc | III.3.1 | **Exploité** (dans `RESULTATS.md`) |
 | Figure C, distribution vol réalisée | La vol réalisée VT ≠ la cible, biais asymétrique | III.3.2 | **Exploité** |
-| Médiane / écart-type / proba ±2pt de la distribution | Précision du biais | III.3.2 | Disponible, non tabulé (§2, effort quasi nul) |
+| Médiane / écart-type / proba ±2pt de la distribution | Précision du biais | III.3.2 | **Exploité** (dans `RESULTATS.md`) |
 | Sensibilité VT à σ_cible / L_max | Le biais dépend des paramètres de construction | III.3.2 | À produire (effort faible-moyen, §4) |

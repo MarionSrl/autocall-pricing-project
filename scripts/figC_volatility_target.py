@@ -126,6 +126,8 @@ def sortie3_scenario_v():
             "niveau_indice_vt_fin_rebond": vt[idx_fin_rebond],
             "sous_participation_pts": trajectoire_nue[0, idx_fin_rebond] - vt[idx_fin_rebond],
             "niveau_indice_vt_fin_episode": vt[idx_fin],
+            "niveau_plancher_indice_nu": trajectoire_nue[0].min(),
+            "niveau_plancher_indice_vt": vt.min(),
         })
     df_resume = pd.DataFrame(lignes)
 
@@ -203,6 +205,9 @@ def main():
 
     print("Sortie 1 : trajectoire type (5 ans)...")
     df1 = sortie1_trajectoire_type()
+    pct_temps_plafond = (df1["exposition_pct"] >= L_MAX * 100 - 1e-6).mean() * 100
+    df1_resume = pd.DataFrame([{"pct_temps_exposition_plafond": pct_temps_plafond}])
+    print(f"  -> temps passé à l'exposition plafond ({L_MAX * 100:.0f}%) : {pct_temps_plafond:.1f}%")
 
     print("Sortie 2 : distribution de la vol réalisée (5000 trajectoires, 1 an)...")
     vol_finale, df2_resume = sortie2_distribution_vol_realisee()
@@ -213,6 +218,7 @@ def main():
     print(df3_resume.to_string(index=False))
 
     ecrire_csv_et_md(df1, os.path.join(REPERTOIRE_FIGURES, "figureC_trajectoire_type"), float_format="{:.4f}")
+    ecrire_csv_et_md(df1_resume, os.path.join(REPERTOIRE_FIGURES, "figureC_trajectoire_type_resume"), float_format="{:.4f}")
     ecrire_csv_et_md(df2_resume, os.path.join(REPERTOIRE_FIGURES, "figureC_distribution_vol_realisee"), float_format="{:.4f}")
     ecrire_csv_et_md(df3, os.path.join(REPERTOIRE_FIGURES, "figureC_scenario_v"), float_format="{:.4f}")
     ecrire_csv_et_md(df3_resume, os.path.join(REPERTOIRE_FIGURES, "figureC_scenario_v_resume"), float_format="{:.4f}")
