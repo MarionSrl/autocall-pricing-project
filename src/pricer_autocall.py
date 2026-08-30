@@ -73,3 +73,26 @@ def pricer_autocall(spots_obs, s0, r, dates_obs, barriere_ac, coupon, barriere_c
     erreur_std = payoffs.std(ddof=1) / np.sqrt(nb_sim)
 
     return ResultatAutocall(prix, erreur_std, payoffs, dates_rappel, pdi_actif, spot_final)
+
+
+def decomposer_legs_pdi(resultat, s0, r, maturite):
+    """Décompose le payoff total en deux jambes (Figure 1, panneau b) :
+
+        payoff_total = jambe_autocall_sans_pdi - jambe_pdi
+
+    où jambe_autocall_sans_pdi est le même produit mais avec un capital
+    toujours intégralement protégé à maturité (équivalent à barriere_cap=0),
+    et jambe_pdi est le manque à gagner actualisé (1 - S_T/s0), non nul
+    uniquement si le produit est allé à maturité avec le PDI actif. Ce n'est
+    pas un vrai put down-and-in (le PDI du produit n'est observé qu'à
+    maturité, cf. README) : c'est un payoff terminal conditionnel au fait de
+    ne pas avoir été rappelé plus tôt.
+
+    Retourne (payoffs_jambe_sans_pdi, payoffs_jambe_pdi), vecteurs (nb_sim,).
+    """
+    disc = np.exp(-r * maturite)
+    payoffs_jambe_pdi = np.where(
+        resultat.pdi_actif, disc * (1.0 - resultat.spot_final / s0), 0.0
+    )
+    payoffs_jambe_sans_pdi = resultat.payoffs + payoffs_jambe_pdi
+    return payoffs_jambe_sans_pdi, payoffs_jambe_pdi

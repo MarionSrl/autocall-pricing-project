@@ -179,9 +179,10 @@ et leurs sorties chiffrées réutilisables directement dans le texte.
 
 - `src/` : `marche.py` (paramètres marché), `simulation.py` (GBM générique, variables
   antithétiques), `indices.py` (indices A/B/C construits sur les mêmes chocs gaussiens,
-  cas de contrôle B′, barrière dégressive), `pricer_autocall.py` (pricer MC de
-  l'autocall), `coupon_solver.py` (coupon au pair par dichotomie de Brent),
-  `style_graphique.py` / `reporting.py` (rendu).
+  cas de contrôle B′, barrière dégressive), `barrier_options.py` (formule fermée du PDI,
+  validation MC), `pricer_autocall.py` (pricer MC de l'autocall, décomposition en jambes),
+  `coupon_solver.py` (coupon au pair par dichotomie de Brent), `style_graphique.py` /
+  `reporting.py` (rendu).
 - `scripts/` : un script par figure, qui écrit son PNG (300 dpi, `figures/`) et ses
   résultats numériques (`figures/*.csv` et `.md`).
 - `tests/` : pytest (convergence, parités, cas limites — voir plus bas).
@@ -191,6 +192,45 @@ et leurs sorties chiffrées réutilisables directement dans le texte.
 
 Pour reproduire une figure : `pip install -r requirements.txt` puis, par exemple,
 `python scripts/fig2_autocall_vs_decrement.py`.
+
+### Figure 1 — le PDI en formule fermée, et le vega de l'autocall complet
+
+**Panneau (a)** trace, en formule fermée (`src/barrier_options.py::put_down_and_in`,
+Bouzoubaa & Osseiran §10.2.2 / Hull ch.26, cas H<K), le prix, le delta, le vega et la
+vanna d'un put down-and-in 100/60 à 1 an, pour un spot de 40 % à 130 % du niveau
+initial. **Point de méthode important, corrigé en cours de développement** : la formule
+de réflexion n'est valable que pour spot > barrière (elle est dérivée sous l'hypothèse
+que la barrière n'a pas encore été touchée). Pour spot ≤ barrière, l'option est
+certainement « in » et vaut alors exactement le put vanille — ce cas est traité
+explicitement dans le code plutôt que laissé à une extrapolation incorrecte de la
+formule (qui donnait, avant correction, des prix supérieurs au put vanille sous la
+barrière — impossible économiquement). C'est précisément ce recollement qui produit la
+**discontinuité de delta à la barrière** (delta ≈ −0.97 juste sous 60, saut à ≈ −2.52
+juste au-dessus) que le panneau doit démontrer. Sur tout le domaine spot > barrière, le
+**vega du PDI reste strictement positif** (jamais négatif, vérifié numériquement sur
+2000 points de la grille) — conforme à l'attendu.
+
+**Panneau (b)** reprend le produit de référence (10 ans, section 1) avec son coupon
+résolu au pair pour un spot de 100 (**11.81 %**, cohérent avec le 11.83 % trouvé pour le
+cas A de la Figure 2 — écart dû aux seeds/résolutions indépendantes des deux scripts),
+et trace son vega total par Monte Carlo (bump ±1pt de vol, differencing commun),
+décomposé en jambe « autocall sans PDI » et jambe « PDI » (`decomposer_legs_pdi`).
+Contrairement au PDI isolé, **le vega total change de signe** : positif pour un spot
+faible (jambe sans-PDI dominante), il devient négatif à partir d'un spot d'environ 71
+(la jambe PDI, dont le poids relatif augmente avec le spot à mesure que la probabilité
+de rappel précoce — donc de sortie du produit avant que le PDI ne compte — diminue,
+finit par dominer en signe opposé). C'est le résultat que la spec demandait de
+démontrer : le vega du PDI seul est de signe constant, celui de l'autocall complet ne
+l'est pas, parce que ses deux jambes ont des expositions vega opposées.
+
+**Validations obligatoires** (voir `tests/test_barrier_options.py`) : KI + KO = vanille
+sur la formule fermée (écart nul à la précision machine) ; convergence de la formule
+fermée vers un prix Monte Carlo indépendant (probabilité de franchissement par pont
+brownien entre pas de simulation, cf. docstring de `mc_put_down_and_in` — un test
+« trajectoire quotidienne a touché la barrière » naïf sous-estime largement la
+probabilité de franchissement continu et fait échouer la tolérance de 0.5 % ; voir aussi
+la note sur Broadie–Glasserman–Kou ci-dessous), écart obtenu : **0.25 %** à 200 000
+trajectoires (spot=70).
 
 ### Convention du coupon — à lire avant d'interpréter les résultats
 
@@ -259,12 +299,18 @@ quantifier l'effet du décrément indépendamment de la barrière.
 ### Hypothèses de modélisation et leurs limites
 
 - **Barrières observées discrètement** (annuellement pour le rappel, à maturité pour le
-  PDI), conformément au produit décrit. Le pricer Monte Carlo observe donc les barrières
-  aux dates de la grille de simulation et non en continu ; aucun ajustement de type
-  Broadie–Glasserman–Kou (correction du niveau de barrière pour un monitoring discret)
-  n'est appliqué à ce stade — il n'est pertinent que pour une barrière **continue** que
-  le mémoire n'évalue pas ici (le PDI, en particulier, est explicitement à maturité
-  uniquement, donc sans ambiguïté de monitoring).
+  PDI), conformément au produit décrit. Le pricer Monte Carlo du produit (Figures 2 et
+  panneau b de la Figure 1) observe donc les barrières aux dates de la grille de
+  simulation et non en continu ; le PDI du produit, en particulier, est explicitement à
+  maturité uniquement, donc sans ambiguïté de monitoring — aucun ajustement de type
+  Broadie–Glasserman–Kou n'y est nécessaire. Le panneau (a) de la Figure 1 est distinct :
+  c'est une illustration autonome d'un **vrai** put down-and-in à barrière **continue**
+  (formule fermée de la théorie des options à barrière), qui ne correspond pas à la
+  convention à maturité uniquement du produit — voir la section dédiée ci-dessus. Sa
+  validation Monte Carlo interne (`mc_put_down_and_in`) applique une correction de
+  continuité (probabilité de franchissement par pont brownien entre pas de simulation),
+  conceptuellement proche de l'ajustement Broadie–Glasserman–Kou, pour comparer
+  équitablement un chemin simulé discrètement à la formule fermée à barrière continue.
 - **Volatilité constante et absence de skew** : tous les sous-jacents (A, B, C) sont
   modélisés sous Black-Scholes avec une volatilité unique et constante (18 %). En
   pratique, un smile/skew de volatilité affecterait différemment les zones proches des

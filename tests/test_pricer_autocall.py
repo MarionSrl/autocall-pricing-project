@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from src.indices import simuler_indices, barriere_degressive, indice_decrement_pourcentage
-from src.pricer_autocall import pricer_autocall
+from src.pricer_autocall import pricer_autocall, decomposer_legs_pdi
 from src.coupon_solver import resoudre_coupon_pair
 
 S0, R, Q, SIGMA, D, K = 100.0, 0.025, 0.03, 0.18, 0.05, 5.0
@@ -63,6 +63,17 @@ def test_coupon_pair_identique_entre_A_et_B_prime_cas_de_controle():
     coupon_B_prime, _ = resoudre_coupon_pair(B_prime_obs, S0, R, DATES_OBS, 1.0, BARRIERE_CAP)
 
     assert coupon_A == pytest.approx(coupon_B_prime, abs=1e-6)
+
+
+def test_decomposition_legs_pdi_se_recompose_en_payoff_total():
+    res = _indices()
+    spots_A = res["A"][:, 1:]
+    resultat = pricer_autocall(spots_A, S0, R, DATES_OBS, 1.0, coupon=0.06, barriere_cap=BARRIERE_CAP)
+    jambe_sans_pdi, jambe_pdi = decomposer_legs_pdi(resultat, S0, R, DATES_OBS[-1])
+    np.testing.assert_allclose(jambe_sans_pdi - jambe_pdi, resultat.payoffs, rtol=1e-12, atol=1e-12)
+    # la jambe PDI n'est non nulle que si le PDI est actif
+    assert np.all(jambe_pdi[~resultat.pdi_actif] == 0.0)
+    assert np.all(jambe_pdi[resultat.pdi_actif] > 0.0)
 
 
 def test_pdi_actif_seulement_a_maturite_sous_la_barriere():
