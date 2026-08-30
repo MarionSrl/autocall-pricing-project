@@ -181,8 +181,9 @@ et leurs sorties chiffrées réutilisables directement dans le texte.
   antithétiques), `indices.py` (indices A/B/C construits sur les mêmes chocs gaussiens,
   cas de contrôle B′, barrière dégressive), `barrier_options.py` (formule fermée du PDI,
   validation MC), `pricer_autocall.py` (pricer MC de l'autocall, décomposition en jambes),
-  `coupon_solver.py` (coupon au pair par dichotomie de Brent), `style_graphique.py` /
-  `reporting.py` (rendu).
+  `coupon_solver.py` (coupon au pair par dichotomie de Brent), `vol_target.py` (modèle de
+  vol à 2 régimes, indice Volatility Target), `style_graphique.py` / `reporting.py`
+  (rendu).
 - `scripts/` : un script par figure, qui écrit son PNG (300 dpi, `figures/`) et ses
   résultats numériques (`figures/*.csv` et `.md`).
 - `tests/` : pytest (convergence, parités, cas limites — voir plus bas).
@@ -306,6 +307,64 @@ attribuable au seul mécanisme de décrément en points, sans effet confondu par
 changement de barrière. C'est la comparaison la plus propre du jeu de résultats pour
 quantifier l'effet du décrément indépendamment de la barrière.
 
+### Figure 3 — indice Volatility Target
+
+Indice VT construit sur l'indice A, mécanique `e_t = min(L_max, sigma_cible /
+sigma_réalisée_t)` avec `sigma_cible = 15 %`, `L_max = 150 %`, fenêtre glissante de 20
+jours ouvrés, rebalancement quotidien.
+
+**Modèle de volatilité — Heston vs 2 régimes.** Choix : un modèle à 2 régimes (calme
+9 %, stress 32 %, durées moyennes 60j / 20j, cf. `src/vol_target.py` pour la
+justification complète). La seule exigence de la spec est que la vol réalisée ne soit
+pas constante ; un modèle à régimes l'obtient avec 4 paramètres directement
+interprétables et sans les difficultés numériques de Heston (condition de Feller,
+schéma de discrétisation évitant les variances négatives), pour un mécanisme qui
+n'a de toute façon besoin que de la **persistance** de la vol (clustering), pas de sa
+forme fine.
+
+**Sortie 1 (trajectoire type, 5 ans).** L'indice VT suit l'indice sous-jacent en
+l'amplifiant dans les phases calmes (exposition plafonnée à 150 %) et en le désamplifiant
+dans les phases de stress (exposition tombant jusqu'à ~35-40 %) — l'exposition e_t
+oscille nettement entre les deux bornes au gré des changements de régime.
+
+**Sortie 2 (distribution de la vol réalisée, 5000 trajectoires, 1 an).** La vol réalisée
+de l'indice VT n'égale pas la cible : moyenne **16,0 %** et médiane **16,0 %** contre une
+cible de 15 %, écart-type **1,3 point**, et seulement **76 %** des trajectoires dans
+`[13 %, 17 %]`. Le biais est asymétrique vers le haut : le plafond `L_max` empêche
+l'indice de compenser pleinement en période calme (l'exposition ne peut pas dépasser
+150 % même si `cible/vol` le voudrait), alors que rien ne borne la désensibilisation en
+période de stress — d'où une vol réalisée en moyenne au-dessus, pas en dessous, de la
+cible. C'est l'argument central de la section III.3.2 : le mécanisme ne délivre pas la
+vol cible, par construction.
+
+**Sortie 3 (scénario V scripté : chute de 30 % puis rebond symétrique, déterministe).**
+Deux effets se combinent, tous deux défavorables à l'indice VT :
+- **Avant le choc** : la période précédente est plate (vol réalisée nulle), donc
+  l'exposition est bloquée au plafond de 150 % au moment où le choc survient — l'indice
+  VT chute donc *plus* que l'indice nu pendant la phase de baisse (creux à ~64-67 selon
+  la fenêtre, contre 70 pour l'indice nu, cf. `figure3_scenario_v.csv`).
+- **Après le choc** : la fenêtre glissante intègre les rendements du crash avec retard,
+  l'exposition ne se réduit qu'une fois la vol réalisée montée — trop tard pour profiter
+  pleinement du rebond. **Sous-participation au rebond : 17,5 points (fenêtre 20j) et
+  18,3 points (fenêtre 60j)** — l'indice nu revient exactement à 100 (par construction du
+  scénario), l'indice VT plafonne autour de 82.
+- **Bonus fenêtre 20j vs 60j** : la fenêtre plus longue (60j) fait pire, pas mieux, sur
+  ce scénario précis — elle réagit plus lentement à la hausse de vol, reste donc
+  surexposée plus longtemps pendant la chute (creux plus bas) et désamorce l'exposition
+  avec un délai plus long, d'où une sous-participation légèrement supérieure. Ce
+  résultat n'est pas généralisable à tout scénario (une fenêtre plus longue lisse aussi
+  davantage les faux signaux sur un chemin bruité) ; il montre seulement que "plus
+  longue" n'est pas synonyme de "plus prudente" face à un choc rapide et isolé.
+
+**Limite de méthode propre à ce scénario** : la période "avant" est délibérément
+parfaitement plate (vol nulle) pour isoler l'effet du choc dans un scénario scripté —
+en réalité la vol réalisée n'est jamais exactement nulle, donc le plafond `L_max` ne
+serait pas aussi systématiquement atteint juste avant un choc réel. L'effet de
+sur-exposition au moment du choc est donc probablement exagéré par construction du
+scénario ; l'effet de sous-participation au rebond (piloté par le retard structurel de
+la fenêtre glissante, pas par le niveau de vol pré-choc) est en revanche robuste à cette
+simplification.
+
 ### Hypothèses de modélisation et leurs limites
 
 - **Barrières observées discrètement** (annuellement pour le rappel, à maturité pour le
@@ -337,10 +396,13 @@ quantifier l'effet du décrément indépendamment de la barrière.
   barrières (rappel comme PDI) ; son absence est une simplification qui **sous-estime
   probablement** l'ampleur des sensibilités mises en évidence dans les Figures 1 et 3.
 - **Pas de coûts de transaction ni de frais de gestion** : ni sur la réplication du
-  décrément (indices B et C), ni sur un éventuel rebalancement dynamique (Figure 3,
-  indice Volatility Target). Les mécanismes étudiés sont donc présentés dans leur version
-  la plus favorable ; en pratique les coûts réduiraient les niveaux de coupon atteignables
-  et amplifieraient la sous-performance des indices Volatility Target au rebalancement.
+  décrément (indices B et C), ni sur le rebalancement **quotidien** de l'indice
+  Volatility Target (Figure 3) entre le sous-jacent et le cash. Les mécanismes étudiés
+  sont donc présentés dans leur version la plus favorable ; en pratique les coûts
+  réduiraient les niveaux de coupon atteignables, et pèseraient d'autant plus sur
+  l'indice VT que l'exposition varie fréquemment (justement les phases où le mécanisme
+  est le plus actif, cf. Figure 3, sortie 1) — un rebalancement quotidien sans coût est
+  une hypothèse particulièrement favorable pour ce mécanisme.
 - **Corrélation parfaite entre A, B, C** : les trois sous-jacents comparés partagent les
   mêmes trajectoires browniennes (même graine, mêmes chocs gaussiens), afin d'isoler
   strictement l'effet du mécanisme de décrément (« toutes choses égales par ailleurs »).
