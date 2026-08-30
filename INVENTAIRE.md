@@ -42,9 +42,20 @@ qui reste.
 
 **Redondance avec `RESULTATS.md`** : la moyenne de vol réalisée, la sous-participation (20j/60j) et l'écart en fin de scénario sont repris en table — mais **la forme des courbes** (trajectoire type sur 5 ans, forme de la distribution, dynamique jour par jour du scénario V) n'est disponible nulle part ailleurs que dans le graphique ou le CSV brut (1261 et 187 lignes respectivement). Aucun panneau candidat à la coupe ici : les trois portent une information distincte et aucune n'est un simple doublon de table.
 
+### `figureD_hedging.png` (2 panneaux) — ajoutée depuis la première version de cet inventaire
+
+| Panneau | Axes / séries | Plage | Ce qu'il démontre |
+|---|---|---|---|
+| (a) PnL vs vol réalisée | x = vol réalisée (%), y = PnL de couverture (base nominal 100) ; points empiriques ± erreur std + courbe théorique de gamma-trading | vol 15→30%, PnL −2.5→+8.3 | Le PnL de couverture croît avec l'écart entre vol réalisée et vol modèle (20%), et la prédiction théorique reproduit le signe et l'ordre de grandeur (validation quantitative, pas seulement qualitative) |
+| (b) Dispersion PnL vs fréquence | x = fréquence de rebalancement (1j/5j/10j/20j), y = PnL de couverture, boxplot (2000 trajectoires chacun) | médiane et IQR quasi identiques d'une fréquence à l'autre | Confirme le résultat du notebook : la dispersion ne se réduit quasiment pas avec un rebalancement plus fréquent — le risque résiduel vient des discontinuités de payoff (gap risk), pas de la granularité |
+
+**Redondance avec `RESULTATS.md`** : le gamma moyen, le temps de sortie moyen, et les 4+4 points (PnL moyen par vol/fréquence) sont repris en table. Les courbes/distributions complètes (grille delta/gamma 40×25×3, 2000 trajectoires brutes par scénario) ne le sont pas — cohérent avec le reste du repo, aucune redondance à signaler.
+
+**Porte sur un produit distinct** (5 ans, coupon fixe 7%, vol modèle 20%, sans dividende) des Figures A-C (10 ans, coupon au pair, q=3%) — voir le README pour la justification. Les niveaux de PnL ne sont donc pas directement comparables aux coupons de la Figure B.
+
 ### Synthèse — que couper si besoin de place
 
-Par ordre de "coupable sans perte d'information" : Figure B (a) > Figure B (c)/(d) > rien d'autre. Tous les autres panneaux (Figure A en totalité, Figure B(b), Figure C en totalité) portent une information que aucune table ne reproduit.
+Par ordre de "coupable sans perte d'information" : Figure B (a) > Figure B (c)/(d) > rien d'autre. Tous les autres panneaux (Figure A en totalité, Figure B(b), Figure C en totalité, Figure D en totalité) portent une information que aucune table ne reproduit.
 
 ---
 
@@ -63,6 +74,10 @@ Par ordre de "coupable sans perte d'information" : Figure B (a) > Figure B (c)/(
 | `figureC_scenario_v.csv` (187 lignes) | jour, indice_nu, indice_vt_20j, exposition_20j_pct, indice_vt_60j, exposition_60j_pct | Non (le résumé seul l'est) | Le **creux minimal** de l'indice VT pendant la chute (visible dans le graphique, ~64-67 selon la fenêtre) n'est calculé nulle part comme chiffre isolé — il faudrait l'extraire de ce CSV (`.min()`) |
 | `figureC_scenario_v_resume.csv` | fenetre_jours, niveau_indice_nu_fin_rebond, niveau_indice_vt_fin_rebond, sous_participation_pts, niveau_indice_vt_fin_episode | Oui (sous_participation + écart fin épisode) | — |
 | `figureC_trajectoire_type.csv` (1261 lignes) | annee, indice_sous_jacent, indice_vt, exposition_pct | Non | Aucune statistique de synthèse n'est calculée sur cette trajectoire (ex. % du temps à l'exposition plafond, écart final indice nu vs VT sur 5 ans) — tout est dans le graphique uniquement |
+| `figureD_pnl_vs_vol_realisee.csv` (4 lignes) | vol_realisee_pct, pnl_moyen, pnl_erreur_std, nb_trajectoires, pnl_theorique | Oui (pnl_moyen et pnl_theorique) | `pnl_erreur_std` (précision de chaque point, ~0.14 à 0.30) n'est pas repris en table |
+| `figureD_resume.csv` | gamma_moyen_dollar, gamma_s2_moyen, temps_sortie_moyen_annees, prix_initial_pct, nb_trajectoires_grille_delta, nb_trajectoires_couverture_par_scenario, coupon_pct, maturite_annees, vol_modele_pct | Oui (gamma_moyen_dollar, temps_sortie_moyen_annees, prix_initial_pct, les 2 nb_trajectoires) | `gamma_s2_moyen` (la quantité gamma×spot² réellement utilisée pour la courbe théorique, plus précise que gamma_moyen×S0²) n'est pas commentée en texte |
+| `figureD_pnl_vs_frequence.csv` (4 lignes) | freq_rebal_jours, pnl_moyen, pnl_ecart_type, pnl_erreur_std, nb_trajectoires | Oui (pnl_moyen, pnl_ecart_type) | — |
+| `figureD_pnl_vs_frequence_brut.csv` (8000 lignes) | freq_rebal_jours, pnl | Non (résumé seul) | La distribution complète (asymétrie, queues épaisses visibles sur le boxplot) n'est décrite que visuellement, jamais quantifiée (skewness, quantiles) |
 
 ### Chiffres disponibles auxquels tu n'as pas accès aujourd'hui (hors CSV/graphique)
 
@@ -76,105 +91,84 @@ Ce sont des nombres déjà calculés par les scripts, visibles seulement dans le
 
 ---
 
-## 3. Le gisement inexploité : le notebook d'origine
+## 3. Le gisement du notebook d'origine — état après intervention
 
-Vérification technique effectuée dans cette session (exécution complète du notebook,
-19 cellules de code) : le notebook est **totalement indépendant de `src/`** (aucun
-`import` depuis les modules refactorés — il redéfinit ses propres fonctions), donc le
-refactor n'a **aucun impact** dessus. En revanche, il contient **2 bugs de dérive de
-version de bibliothèque**, tous les deux triviaux à corriger :
+Vérification technique effectuée dans une session antérieure (exécution complète du
+notebook, 19 cellules de code) : le notebook est **totalement indépendant de `src/`**
+(aucun `import` depuis les modules refactorés — il redéfinit ses propres fonctions),
+donc le refactor n'a **aucun impact** dessus. Il contenait **2 bugs de dérive de
+version de bibliothèque, tous les deux corrigés depuis** (voir le commit sur
+`notebooks/Pricer_Autocall_MC.ipynb`) :
 
-- Cellule 45 (`simuler_delta_hedging`) : `float(interp(...))` échoue sous NumPy 2.x
-  (`TypeError: only 0-dimensional arrays can be converted to Python scalars`) —
-  NumPy a durci le comportement de `float()` sur un array à un seul élément. Correctif :
-  `float(interp(...)[0])`.
-- Cellule 56 (boxplot de synthèse) : `ax.boxplot(..., labels=...)` échoue sous
-  Matplotlib récent (le paramètre a été renommé `tick_labels`). Correctif : renommer
-  le paramètre.
+- Cellule 45 (`simuler_delta_hedging`) : `float(interp(...))` échouait sous NumPy 2.x
+  (`TypeError: only 0-dimensional arrays can be converted to Python scalars`).
+  **Corrigé** : `float(interp(...)[0])`.
+- Cellule 56 (boxplot de synthèse) : `ax.boxplot(..., labels=...)` échouait sous
+  Matplotlib récent (paramètre renommé `tick_labels`). **Corrigé**.
 
-**Ces deux corrections suffisent** : le notebook complet (100 000 trajectoires pour le
-pricer principal, grille de delta, 1 100 simulations de hedging) s'exécute alors de
-bout en bout sans erreur, en **4 min 43 s** dans cet environnement. Tous les résultats
-ci-dessous ont été obtenus par cette exécution réelle (pas des valeurs de mémoire).
+Le notebook complet (100 000 trajectoires pour le pricer principal, grille de delta,
+1 100 simulations de hedging) s'exécute désormais de bout en bout sans erreur, en
+4 min 43 s.
 
-**Point d'attention important** : le produit utilisé par le notebook est **différent**
-de celui des 3 figures du mémoire — maturité 5 ans (pas 10), coupon fixe à 7% (pas
-résolu au pair), volatilité 20% (pas 18%), pas de dividende `q`. Les chiffres ci-dessous
-illustrent la mécanique, mais ne sont pas directement comparables aux résultats de
-Figure B.
+**Point d'attention important, toujours valable** : le produit utilisé par le notebook
+est **différent** de celui des Figures A-C — maturité 5 ans (pas 10), coupon fixe à 7%
+(pas résolu au pair), volatilité 20% (pas 18%), pas de dividende `q`.
 
-### 3.1 Delta hedging — PnL principal
+**Mise à jour majeure : les sections 3.1 à 3.3 sont maintenant exploitées.** Plutôt que
+de laisser ces analyses dans le notebook, elles ont été portées en module réutilisable
+(`src/delta_hedging.py` : grille delta/gamma par bump-and-reprice réutilisant
+`pricer_autocall`, simulateur de couverture path-dépendant) et publiées comme
+**Figure D** (`figD_hedging_produit_notebook.py`, panneaux "PnL vs vol réalisée +
+prédiction théorique" et "dispersion PnL vs fréquence de rebalancement"), sur le
+produit du notebook (le choix de ne pas porter vers le produit à 10 ans est resté celui
+retenu — voir le README). Les résultats ci-dessous sont ceux de la Figure D (seed
+globale, 2000 trajectoires par scénario, donc légèrement différents des premiers essais
+notebook à 300-500 trajectoires et seed locale, mais du même ordre de grandeur).
 
-**Ce qu'elle produit** : simule 500 trajectoires de delta hedging (rebalancement tous
-les 5 jours, delta interpolé sur une grille pré-calculée 40 pas de temps × 25 pas de
-spot) et calcule la distribution du PnL de couverture.
+### 3.1 Delta hedging — PnL principal — **exploité (Figure D)**
 
-**Résultat obtenu** : PnL moyen = **+0.51** (nominal 100), écart-type = **5.87**,
-min/max = **[−23.86 ; +45.72]**. PnL centré près de zéro (couverture non biaisée) mais
-dispersion large — cohérent avec un produit à payoff discontinu.
+**Résultat obtenu (Figure D, scénario de référence vol=20%=modèle, freq=5j, 2000
+trajectoires)** : PnL moyen = **+1.16**, cohérent avec une couverture non biaisée. La
+grille de delta/gamma sous-jacente (25 spots × 40 temps × 3 évaluations bump-reprice)
+est construite en ~3.5s en réutilisant `pricer_autocall`.
 
-**Exécutable en l'état** : oui, après le correctif d'une ligne ci-dessus.
-
-**Effort pour figure propre (sur le produit du notebook)** : faible — reformatage aux
-standards du repo (style, 300 dpi, labels déjà en français, export CSV/MD des
-statistiques). Quelques heures.
-
-**Effort pour la porter sur le produit du mémoire** (10 ans, coupon au pair, avec `q`,
-éventuellement comparée entre indices A/B/C) : plus substantiel — il faut reconstruire
-la grille de delta et le simulateur de hedging pour qu'ils utilisent la convention de
-payoff et les paramètres actuels de `src/pricer_autocall.py` (le calcul du delta par
-bump-and-reprice existe déjà en embryon dans `figA_sensibilites_pdi_autocall.py`
-pour le vega — le même principe s'applique au delta, mais la boucle de simulation du
-hedging path-dépendant avec rebalancement est un module entièrement nouveau). Ordre de
-grandeur : comparable à la construction d'une des 3 figures existantes (nouveau module
-`src/`, script, tests, CSV) — pas une extension à coût marginal nul.
-
-### 3.2 PnL par fréquence de rebalancement
-
-**Ce qu'elle produit** : le même hedging que 3.1, répété pour 4 fréquences de
-rebalancement (1, 5, 10, 20 jours), 300 simulations chacune.
+### 3.2 PnL par fréquence de rebalancement — **exploité (Figure D, panneau b)**
 
 **Résultat obtenu** :
 
 | Fréquence | PnL moyen | Écart-type |
 |---|---|---|
-| 1 jour | +0.23 | 5.83 |
-| 5 jours | +0.39 | 5.96 |
-| 10 jours | +0.36 | 6.10 |
-| 20 jours | +0.19 | 5.89 |
+| 1 jour | +0.93 | 7.68 |
+| 5 jours | +0.84 | 7.50 |
+| 10 jours | +1.29 | 8.05 |
+| 20 jours | +1.19 | 8.22 |
 
-L'écart-type est **quasiment plat** entre 1 et 20 jours de fréquence — augmenter la
-fréquence de rebalancement n'améliore quasiment pas la couverture. C'est un résultat
-quantitatif directement exploitable pour III.2 : le risque résiduel du hedging vient
-des discontinuités de payoff aux barrières (gap risk), pas de la granularité du
+Écart-type quasiment plat entre 1 et 20 jours — confirmé avec 2000 trajectoires par
+fréquence (vs 300 dans le notebook d'origine) : le risque résiduel du hedging vient des
+discontinuités de payoff aux barrières (gap risk), pas de la granularité du
 rebalancement.
 
-**Exécutable en l'état / effort** : identique à 3.1 (même infrastructure).
+### 3.3 Mismatch volatilité réalisée vs volatilité de couverture — **exploité (Figure D, panneau a)**
 
-### 3.3 Mismatch volatilité réalisée vs volatilité de couverture
+**Résultat obtenu, avec prédiction théorique superposée** (voir `src/delta_hedging.py`
+pour la convention de signe — un hedger qui vend le produit et couvre au delta modèle
+est *short gamma*, la formule correcte est
+`dPnL ≈ ½·gamma_$·S²·(σ_modèle² − σ_réalisée²)·dt`, et non l'inverse comme souvent
+écrit de façon informelle pour un acheteur d'option) :
 
-**Ce qu'elle produit** : hedging avec une grille de delta calculée à vol modèle 20%,
-appliquée à des trajectoires simulées à vol réalisée 15%, 20%, 25%, 30% (300
-simulations chacune) — teste l'impact d'une mauvaise estimation de la vol par le
-trader.
-
-**Résultat obtenu** :
-
-| Vol réalisée | PnL moyen | Écart-type |
+| Vol réalisée | PnL moyen (simulé) | PnL théorique |
 |---|---|---|
-| 15% | −2.15 | 5.98 |
-| 20% (= vol modèle) | +1.61 | 7.07 |
-| 25% | +4.69 | 8.01 |
-| 30% | +7.88 | 10.15 |
+| 15% | −2.52 | −3.94 |
+| 20% (= vol modèle) | +1.16 | ≈0 |
+| 25% | +5.02 | +5.07 |
+| 30% | +8.34 | +11.27 |
 
-Relation quasi linéaire et monotone entre vol réalisée et PnL moyen, cohérente avec
-`PnL ≈ ½Γ(σ_réal² − σ_modèle²)` — c'est **la meilleure figure candidate pour III.2** :
-elle quantifie directement le risque de gamma/vol résiduel non couvert par le delta
-hedging, avec un lien explicite à la formule théorique.
+La prédiction théorique reproduit le signe sur toute la plage et l'ordre de grandeur
+(quasi exact à 25%, sur-estimé d'environ 35% à 30% — attendu, la formule est une
+approximation au premier ordre qui ignore la path-dépendance et les sorties anticipées
+propres à un autocall). **C'est la validation quantitative demandée pour III.2.**
 
-**Exécutable en l'état / effort** : identique à 3.1/3.2.
-
-### 3.4 Taux stochastiques (Vasicek)
+### 3.4 Taux stochastiques (Vasicek) — toujours inexploité
 
 **Ce qu'elle produit** : compare le prix et la probabilité d'autocall sous taux
 constant vs modèle de Vasicek (`a=0.5, b=3%, σ_r=1%, ρ=−0.2`), puis fait varier `σ_r`
@@ -192,20 +186,15 @@ affectée par les 2 bugs (qui n'apparaissent qu'en cellule 45, section hedging).
 sujet direct des sections III.1-III.3 identifiées, mais mobilisable si le mémoire
 aborde la robustesse de l'hypothèse de taux constant.
 
-### 3.5 Grille de delta pré-calculée
+### 3.5 Grille de delta (et désormais gamma) pré-calculée — **portée dans `src/delta_hedging.py`, pas encore affichée en heatmap**
 
-**Ce qu'elle produit** : une heatmap delta(temps, spot) sur une grille 40×25,
-construite en 1.1 s, qui sert d'input à 3.1-3.3.
-
-**Résultat obtenu** : delta fortement instable près des deux barrières (100% et 60%),
-confirmé visuellement (carte de chaleur avec fortes variations locales) — utile comme
-figure d'appui pour expliquer *pourquoi* le hedging est difficile, avant de montrer le
-PnL qui en résulte.
-
-**Exécutable en l'état** : oui.
-
-**Effort pour figure propre** : faible sur le produit du notebook ; nécessite la même
-reconstruction que 3.1 si portée sur le produit du mémoire.
+La grille existe et est utilisée en interne par la Figure D (`construire_grille_delta_gamma`,
+25 spots × 40 temps, delta ET gamma désormais, ~3.5s), mais n'est pas exposée comme
+panneau visuel indépendant (contrairement au notebook qui en fait une figure à part,
+cellule 43). **Reste à faire, effort très faible** (les données existent déjà, il ne
+manque qu'un `pcolormesh` + export CSV) si une heatmap delta/gamma(temps, spot) s'avère
+utile en illustration d'appui pour expliquer visuellement *pourquoi* le hedging est
+difficile près des barrières, avant de montrer le PnL qui en résulte.
 
 ---
 
@@ -224,7 +213,8 @@ place (`simuler_indices`, `pricer_autocall`, `coupon_solver`, `barrier_options`,
 | **Sensibilité de l'indice C au paramètre K** (décrément en points) | Faible | Moyen — approfondit le point de vigilance déjà démontré (K=5 donne un coupon extrême) | Optionnel |
 | **Sensibilité de l'indice VT à σ_cible et L_max** (rejouer sortie 2/3 de la Figure C avec d'autres valeurs) | Faible-moyen | Moyen — renforce III.3.2 (le biais dépend des paramètres de construction, pas seulement du mécanisme) | Optionnel |
 | **Statistique de synthèse manquantes du §2** (creux du scénario V, % de temps au plafond L_max sur la trajectoire type, médiane/écart-type de la vol réalisée) | Très faible — extraction directe des CSV déjà produits, aucune nouvelle simulation | Faible-moyen — complète `RESULTATS.md` sans nouveau calcul | **À faire, c'est gratuit** |
-| **Delta hedging sur le produit du mémoire** (cf. §3.1) | Élevé — nouveau module de simulation path-dépendante | Élevé — répond directement à III.2 | Voir §3, ce n'est pas "peu coûteux" |
+| **Heatmap delta/gamma(temps, spot)** (les grilles existent déjà dans `src/delta_hedging.py`, juste jamais tracées) | Très faible — `pcolormesh` + CSV, aucune nouvelle simulation | Faible-moyen — illustration d'appui pour la Figure D, pas indispensable | **À faire si le temps le permet, c'est presque gratuit** |
+| **Delta hedging sur le produit du mémoire (10 ans, coupon au pair)** (porter `src/delta_hedging.py` du produit notebook vers `src/pricer_autocall.py`) | Élevé — même module réutilisable, mais nouvelle grille + nouvelles simulations de couverture à faire tourner et valider | Élevé — chiffres directement comparables aux coupons de la Figure B | Reste "non peu coûteux" malgré la Figure D — voir §3 |
 | **Modèle de smile / skew de volatilité** | Élevé — nouveau moteur (vol locale ou stochastique calibrée) | — | **Pas rentable** dans le temps restant |
 | **Produit worst-of multi-actifs** | Élevé — nouveau moteur (corrélation, plusieurs sous-jacents) | — | **Pas rentable** |
 | **Pricer EDP** | Élevé — nouvelle méthode numérique complète | Faible (le MC suffit à démontrer les points du mémoire) | **Pas rentable** |
@@ -243,11 +233,11 @@ place (`simuler_indices`, `pricer_autocall`, `coupon_solver`, `barrier_options`,
 | Figure B, panneau (b) — dates de rappel | Le décrément retarde le rappel | III.1.3 | **Exploité** |
 | Colonnes `proba_rappel_t1...t10` | Détail par date, par cas | III.1.3 | Disponible, non tabulé (§2) |
 | Sensibilité coupon à σ/r | Robustesse de la thèse décrément | III.1.3 | À produire (effort moyen, §4) |
-| Delta hedging PnL (notebook, produit 5 ans) | Couverture non biaisée mais dispersée | III.2 | Disponible après correctif 1 ligne, produit non conforme au mémoire |
-| PnL vs fréquence de rebalancement | Fréquence ≈ sans effet, le gap risk domine | III.2 | Disponible après correctif 1 ligne, idem |
-| PnL vs vol réalisée (mismatch) | `PnL ≈ ½Γ(σ_réal²−σ_modèle²)`, quantifié | III.2 | Disponible après correctif 1 ligne, idem — **meilleur candidat pour III.2** |
-| Grille de delta (heatmap) | Delta instable près des barrières | III.2 | Disponible après correctif, idem |
-| Delta hedging sur le produit du mémoire (10 ans, coupon au pair) | Idem, mais chiffres directement comparables à Figure B | III.2 | **À produire, effort élevé** (§3.1) |
+| Figure D, panneau (a) — PnL vs vol réalisée (mismatch) | `PnL ≈ ½Γ(σ_modèle²−σ_réal²)`, formule validée par la simulation | III.2 | **Exploité (Figure D)** |
+| Figure D, panneau (b) — PnL vs fréquence de rebalancement | Fréquence ≈ sans effet sur la dispersion, le gap risk domine | III.2 | **Exploité (Figure D)** |
+| `figureD_resume.csv` (gamma moyen, trajectoires) | Chiffres citables (gamma moyen dollar, nb trajectoires) | III.2 | **Exploité (Figure D)** |
+| Grille de delta/gamma (heatmap) | Delta/gamma instables près des barrières | III.2 | Grille disponible dans `src/delta_hedging.py`, pas encore tracée (§3.5, §4) |
+| Delta hedging sur le produit du mémoire (10 ans, coupon au pair) | Idem, mais chiffres directement comparables à Figure B | III.2 | **À produire, effort élevé** (§3.1) — Figure D porte sur le produit 5 ans du notebook, pas ce produit-ci |
 | Figure C, trajectoire type | Exposition oscille entre plafond et désensibilisation | III.3.1 | **Exploité** |
 | Figure C, scénario V | Sur-réaction à la chute + sous-participation au rebond | III.3.1 | **Exploité** |
 | Creux exact du scénario V | Quantifie la sur-exposition avant le choc | III.3.1 | Disponible, non calculé comme chiffre isolé (§2, effort quasi nul) |

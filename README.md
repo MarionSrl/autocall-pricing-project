@@ -1,7 +1,7 @@
 # Pricing d'un produit Autocallable — Mémoire BFA3
 
 Pricer Monte Carlo d'un produit autocallable sous Black-Scholes, utilisé pour produire
-les 3 figures quantitatives du mémoire *Comment les indices de nouvelle génération
+les 4 figures quantitatives du mémoire *Comment les indices de nouvelle génération
 (Volatility Target et indices à décrément) permettent-ils de répondre aux contraintes
 de structuration, de valorisation et de couverture des produits structurés actions de
 long terme ?*
@@ -10,11 +10,11 @@ long terme ?*
 
 | Dossier | Contenu |
 |---|---|
-| `notebooks/` | Notebook d'exploration initial (produit 5 ans, taux de Vasicek, delta hedging) — indépendant du reste |
-| `src/` | Modules de pricing : simulation, indices A/B/C, pricer autocall, PDI, coupon, Volatility Target |
+| `notebooks/` | Notebook d'exploration initial (produit 5 ans, taux de Vasicek, delta hedging) — indépendant du reste, exécutable de bout en bout |
+| `src/` | Modules de pricing : simulation, indices A/B/C, pricer autocall, PDI, coupon, Volatility Target, delta hedging |
 | `scripts/` | Un script par figure du mémoire, plus `run_all.py` pour tout régénérer |
 | `figures/` | PNG (300 dpi) et CSV/MD de résultats, un jeu par figure |
-| `tests/` | Tests pytest (26) |
+| `tests/` | Tests pytest (31) |
 | `RESULTATS.md` | Tous les chiffres cités dans le mémoire, regroupés par figure |
 
 ## Installation et reproduction
@@ -22,8 +22,8 @@ long terme ?*
 ```bash
 pip install -r requirements.txt
 
-python scripts/run_all.py   # régénère les 3 figures + RESULTATS.md (~2 min)
-pytest tests/                # lance les 26 tests
+python scripts/run_all.py   # régénère les 4 figures + RESULTATS.md (~5 min)
+pytest tests/                # lance les 31 tests
 ```
 
 Chaque figure peut aussi être relancée seule, par exemple :
@@ -37,9 +37,10 @@ qu'une même quantité recalculée dans deux figures donne toujours le même chi
 Autocall 10 ans, observations annuelles, barrière de rappel à 100 % du niveau initial,
 coupon **à mémoire** (cumulé depuis l'origine, versé uniquement à la date de rappel —
 si le produit n'est jamais rappelé, aucun coupon n'est versé à maturité), protection du
-capital (PDI) à 60 %, **observée à maturité uniquement**.
+capital (PDI) à 60 %, **observée à maturité uniquement**. C'est le produit des Figures
+A, B et C. La **Figure D fait exception** : voir sa description ci-dessous.
 
-## Les 3 figures
+## Les 4 figures
 
 **Figure B — Autocall classique vs décrément** (`figB_autocall_vs_decrement.py`).
 Compare le coupon au pair, les probabilités de rappel et d'activation du PDI, et la
@@ -55,8 +56,17 @@ vega du PDI seul est de signe constant, contrairement à celui de l'autocall com
 sur un modèle de volatilité à 2 régimes : trajectoire type, distribution de la vol
 réalisée face à la cible, et scénario de crash-rebond scripté.
 
-Tous les chiffres (coupons, sensibilités, sous-participation...) sont dans
-**[`RESULTATS.md`](RESULTATS.md)**.
+**Figure D — Delta hedging et risques résiduels de couverture**
+(`figD_hedging_produit_notebook.py`). Panneau (a) : PnL de couverture en fonction du
+mismatch entre volatilité réalisée et volatilité modèle, avec prédiction théorique de
+gamma-trading superposée. Panneau (b) : dispersion du PnL selon la fréquence de
+rebalancement (quasi plate — le risque vient des discontinuités de payoff aux
+barrières, pas de la granularité du rebalancement). **Porte sur le produit du notebook
+d'exploration (5 ans, coupon fixe 7 %, vol modèle 20 %, sans dividende), pas sur le
+produit de référence des Figures A-C** — voir « Conventions à connaître » ci-dessous.
+
+Tous les chiffres (coupons, sensibilités, sous-participation, gamma moyen...) sont
+dans **[`RESULTATS.md`](RESULTATS.md)**.
 
 ## Conventions à connaître
 
@@ -64,14 +74,26 @@ Tous les chiffres (coupons, sensibilités, sous-participation...) sont dans
   la fois le rappel et l'accumulation du coupon. Rien n'est versé à maturité si le
   produit n'a jamais été rappelé — ce qui pénalise mécaniquement les indices à
   décrément dans la Figure B, puisqu'ils retardent le rappel.
-- **Deux notions de barrière, à ne pas confondre** : le PDI du produit (Figures 2 et
-  1b) est une condition terminale, observée à maturité uniquement — pas de monitoring
-  continu. Le panneau (a) de la Figure A illustre séparément un *vrai* put
+- **Deux notions de barrière, à ne pas confondre** : le PDI du produit (Figures B et
+  A-panneau b) est une condition terminale, observée à maturité uniquement — pas de
+  monitoring continu. Le panneau (a) de la Figure A illustre séparément un *vrai* put
   down-and-in à barrière continûment observée (formule fermée classique), dont la
   validation Monte Carlo utilise une correction de continuité par pont brownien.
 - **Pas de coûts de transaction** (réplication du décrément, rebalancement quotidien
-  de l'indice Volatility Target) : les mécanismes sont présentés dans leur
-  configuration la plus favorable.
+  de l'indice Volatility Target ou du hedge de la Figure D) : les mécanismes sont
+  présentés dans leur configuration la plus favorable.
+- **La Figure D porte sur un produit différent des Figures A-C** : maturité 5 ans (pas
+  10), coupon fixe à 7 % (pas résolu au pair), volatilité modèle 20 % (pas 18 %), pas
+  de dividende. C'est le produit du notebook d'exploration original, réutilisé tel quel
+  plutôt que porté sur le produit à 10 ans. Ce choix ne remet pas en cause la
+  conclusion de la Figure D : le mécanisme démontré — risque résiduel de gap aux
+  barrières de rappel/capital, sensibilité du PnL de couverture au mismatch entre
+  volatilité réalisée et volatilité modèle — est **structurel** à tout autocall à
+  barrières discontinues, il ne dépend ni de la maturité ni du niveau du coupon. Les
+  *niveaux* de PnL affichés ne sont donc pas directement comparables aux coupons des
+  Figures A-C (ils portent sur un produit à 5 ans, coupon 7 % fixe), mais la
+  *relation* PnL-vs-mismatch et PnL-vs-fréquence qu'elle illustre se généraliserait
+  qualitativement au produit à 10 ans.
 
 Le détail complet de ces hypothèses et de leurs limites est rédigé en texte continu
 ci-dessous, pour être repris tel quel en annexe méthodologique du mémoire.
@@ -80,22 +102,22 @@ ci-dessous, pour être repris tel quel en annexe méthodologique du mémoire.
 
 *Section rédigée pour être reprise telle quelle en annexe méthodologique du mémoire.*
 
-Les trois figures reposent sur un cadre de simulation Black-Scholes standard, à
+Les quatre figures reposent sur un cadre de simulation Black-Scholes standard, à
 volatilité constante et sans smile ni skew : chaque sous-jacent est modélisé par un
 mouvement brownien géométrique sous la probabilité risque-neutre, avec un taux sans
 risque, un rendement de dividende et une volatilité fixés une fois pour toutes
-(respectivement 2,5 %, 3 % et 18 % pour les indices actions des Figures 1 et 2). Cette
+(respectivement 2,5 %, 3 % et 18 % pour les indices actions des Figures A et B). Cette
 simplification est délibérée : elle isole l'effet des mécanismes étudiés — décrément,
 barrière dégressive, plafond de volatilité — de tout effet confondu par la structure par
 terme ou le sourire de volatilité du marché. Elle a cependant un coût : en pratique, un
 skew de volatilité affecterait différemment les sensibilités mesurées à proximité des
 barrières, qu'il s'agisse du rappel ou de la protection du capital, et son absence tend
 probablement à sous-estimer l'ampleur des sensibilités mises en évidence dans les
-Figures 1 et 3.
+Figures A et C.
 
 La notion de barrière recouvre par ailleurs deux conventions distinctes dans ce travail,
 qu'il convient de ne pas confondre. La protection du capital (PDI) du produit autocall
-étudié dans les Figures 2 et 1(b) n'est observée qu'à l'échéance : il s'agit d'une
+étudié dans les Figures B et A (panneau b) n'est observée qu'à l'échéance : il s'agit d'une
 condition terminale portant sur le seul niveau du sous-jacent à maturité, et non d'un
 monitoring, discret ou continu, d'une barrière tout au long de la vie du produit — c'est
 la convention la plus fréquente en retail, et elle ne pose donc aucune ambiguïté de
@@ -148,6 +170,23 @@ calme ne le ferait. L'effet de sur-exposition au moment du choc qui en résulte 
 probablement amplifié par cette construction ; l'effet de sous-participation au rebond
 qui suit, piloté non par le niveau de volatilité pré-choc mais par le retard structurel
 inhérent à toute fenêtre glissante, est en revanche robuste à cette simplification.
+
+Enfin, la Figure D, consacrée à la couverture en delta et à ses risques résiduels,
+porte délibérément sur un produit distinct de celui des Figures A à C : le produit du
+notebook d'exploration original (maturité 5 ans, coupon fixe de 7 % non résolu au pair,
+volatilité modèle 20 %, sans dividende), plutôt que sur le produit de référence à 10 ans
+utilisé partout ailleurs. Ce choix méthodologique est justifié par le fait que le
+mécanisme mis en évidence — un risque résiduel de gap au franchissement des barrières
+de rappel et de capital, et une sensibilité du P&L de couverture à l'écart entre
+volatilité réalisée et volatilité de modèle — est structurel à tout autocall à
+barrières discrètes et discontinues, indépendamment de sa maturité ou du niveau de son
+coupon ; porter l'analyse sur le produit à 10 ans aurait démontré le même mécanisme,
+au prix d'un effort de développement supplémentaire sans valeur ajoutée pour la
+démonstration. Une conséquence de ce choix est que les niveaux de P&L rapportés dans la
+Figure D ne sont pas directement comparables aux niveaux de coupon des Figures A à C ;
+seules la relation qualitative entre P&L et mismatch de volatilité, et la relative
+insensibilité du risque de couverture à la fréquence de rebalancement, sont les
+résultats à retenir et à généraliser.
 
 ## Extensions possibles
 
