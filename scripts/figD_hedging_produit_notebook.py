@@ -239,7 +239,23 @@ def main():
     print(df_freq.to_string(index=False))
 
     ecrire_csv_et_md(df_vol, os.path.join(REPERTOIRE_FIGURES, "figureD_pnl_vs_vol_realisee"), float_format="{:.4f}")
-    ecrire_csv_et_md(resume, os.path.join(REPERTOIRE_FIGURES, "figureD_resume"), float_format="{:.5f}")
+    note_gamma = (
+        "*Convention de signe (cf. `src/delta_hedging.py`) : `gamma_moyen_dollar` et "
+        "`gamma_s2_moyen` sont le gamma de f(S,sigma), la valeur actualisée du flux "
+        "versé A L'INVESTISSEUR (même fonction et même convention que le vega de la "
+        "Figure A -- aucun changement de perspective entre les deux figures), pas un "
+        "gamma \"de position\" de l'émetteur. Il est négatif ici : f est concave près "
+        "du spot initial, cohérent avec le vega négatif de l'autocall en Figure A "
+        "(-68.40 pt de % au spot initial du produit de référence, `figureA_autocall_vega.csv`) "
+        "-- même sous-jacent économique (le put down-and-in cédé par l'investisseur à "
+        "l'émetteur). Un gamma_f négatif inverse le signe usuel de la formule de "
+        "gamma-trading par rapport au cas manuel d'un vendeur d'option vanille "
+        "(toujours convexe, donc \"short gamma\") : ici l'émetteur, qui vend le produit "
+        "et se couvre en delta au prix modèle, se retrouve net LONG gamma sur son "
+        "livre couvert, d'où le PnL de couverture croissant avec la volatilité "
+        "réalisée (panneau a).*"
+    )
+    ecrire_csv_et_md(resume, os.path.join(REPERTOIRE_FIGURES, "figureD_resume"), float_format="{:.5f}", note=note_gamma)
     ecrire_csv_et_md(df_freq, os.path.join(REPERTOIRE_FIGURES, "figureD_pnl_vs_frequence"), float_format="{:.4f}")
     df_freq_brut.to_csv(os.path.join(REPERTOIRE_FIGURES, "figureD_pnl_vs_frequence_brut.csv"), index=False)
 
