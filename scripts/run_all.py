@@ -15,14 +15,14 @@ import time
 REPERTOIRE_RACINE = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 REPERTOIRE_SCRIPTS = os.path.join(REPERTOIRE_RACINE, "scripts")
 
-# Ordre du mémoire (spec §5) : Figure 2 d'abord, puis Figure 1, puis Figure 3.
+# Ordre du mémoire (spec §5) : Figure B d'abord, puis Figure A, puis Figure C.
 # Les 3 scripts sont indépendants (aucun ne lit la sortie d'un autre) ; cet
 # ordre n'est donc qu'éditorial. generer_resultats.py, lui, doit venir en
 # dernier : il lit les CSV que les 3 scripts précédents viennent d'écrire.
 ETAPES = [
-    "fig2_autocall_vs_decrement.py",
-    "fig1_sensibilites_pdi_autocall.py",
-    "fig3_volatility_target.py",
+    "figB_autocall_vs_decrement.py",
+    "figA_sensibilites_pdi_autocall.py",
+    "figC_volatility_target.py",
     "generer_resultats.py",
 ]
 

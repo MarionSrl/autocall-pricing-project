@@ -76,7 +76,7 @@ def pricer_autocall(spots_obs, s0, r, dates_obs, barriere_ac, coupon, barriere_c
 
 
 def decomposer_legs_pdi(resultat, s0, r, maturite):
-    """Décompose le payoff total en deux jambes (Figure 1, panneau b) :
+    """Décompose le payoff total en deux jambes (Figure A, panneau b) :
 
         payoff_total = jambe_autocall_sans_pdi - jambe_pdi
 

@@ -1,4 +1,4 @@
-"""Figure 3 — Indice Volatility Target (section III.3.1 du mémoire).
+"""Figure C — Indice Volatility Target (section III.3.1 du mémoire).
 
 Indice VT construit sur l'indice A (classique), avec un modèle de volatilité
 à 2 régimes (calme / stress) plutôt que Heston — voir la justification en
@@ -16,8 +16,8 @@ Trois sorties :
    indice nu vs indice VT, quantification de la sous-participation au
    rebond, et comparaison fenêtre 20j vs 60j (bonus).
 
-Écrit figures/figure3_volatility_target.png (300 dpi) et les résultats
-numériques dans figures/figure3_*.{csv,md}.
+Écrit figures/figureC_volatility_target.png (300 dpi) et les résultats
+numériques dans figures/figureC_*.{csv,md}.
 """
 
 import os
@@ -191,7 +191,7 @@ def tracer_figure(df1, vol_finale, df3, reperes):
     ax3.legend(fontsize=8)
 
     fig.tight_layout()
-    chemin = os.path.join(REPERTOIRE_FIGURES, "figure3_volatility_target.png")
+    chemin = os.path.join(REPERTOIRE_FIGURES, "figureC_volatility_target.png")
     fig.savefig(chemin, dpi=300)
     plt.close(fig)
     print(f"Figure enregistrée : {chemin}")
@@ -212,10 +212,10 @@ def main():
     df3, df3_resume, reperes = sortie3_scenario_v()
     print(df3_resume.to_string(index=False))
 
-    ecrire_csv_et_md(df1, os.path.join(REPERTOIRE_FIGURES, "figure3_trajectoire_type"), float_format="{:.4f}")
-    ecrire_csv_et_md(df2_resume, os.path.join(REPERTOIRE_FIGURES, "figure3_distribution_vol_realisee"), float_format="{:.4f}")
-    ecrire_csv_et_md(df3, os.path.join(REPERTOIRE_FIGURES, "figure3_scenario_v"), float_format="{:.4f}")
-    ecrire_csv_et_md(df3_resume, os.path.join(REPERTOIRE_FIGURES, "figure3_scenario_v_resume"), float_format="{:.4f}")
+    ecrire_csv_et_md(df1, os.path.join(REPERTOIRE_FIGURES, "figureC_trajectoire_type"), float_format="{:.4f}")
+    ecrire_csv_et_md(df2_resume, os.path.join(REPERTOIRE_FIGURES, "figureC_distribution_vol_realisee"), float_format="{:.4f}")
+    ecrire_csv_et_md(df3, os.path.join(REPERTOIRE_FIGURES, "figureC_scenario_v"), float_format="{:.4f}")
+    ecrire_csv_et_md(df3_resume, os.path.join(REPERTOIRE_FIGURES, "figureC_scenario_v_resume"), float_format="{:.4f}")
 
     tracer_figure(df1, vol_finale, df3, reperes)
     print(f"Terminé en {time.time() - t0:.1f}s")

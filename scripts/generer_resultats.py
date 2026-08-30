@@ -1,6 +1,6 @@
 """Génère RESULTATS.md à la racine du repo : tous les chiffres cités dans le
 mémoire, regroupés par figure, à partir des CSV déjà produits par les scripts
-de figure (fig1_*.py, fig2_*.py, fig3_*.py).
+de figure (figA_*.py, figB_*.py, figC_*.py).
 
 Ne relance aucune simulation : suppose que figures/*.csv existent déjà. Pour
 tout régénérer depuis zéro (figures + ce fichier), utiliser scripts/run_all.py.
@@ -31,10 +31,10 @@ def _fmt(valeur):
     return DECIMALES.format(valeur)
 
 
-def section_figure2():
-    df = _lire("figure2_resultats.csv")
+def section_figureB():
+    df = _lire("figureB_resultats.csv")
     lignes = [
-        "## Figure 2 — Autocall classique vs décrément",
+        "## Figure B — Autocall classique vs décrément",
         "",
         "| Cas | Coupon au pair (%) | Erreur std MC (%) | Forward théorique 10 ans | "
         "Proba. rappel avant maturité (%) | Proba. activation PDI (%) | Perte moy. conditionnelle (%) |",
@@ -50,9 +50,9 @@ def section_figure2():
     return "\n".join(lignes)
 
 
-def section_figure1():
-    df_delta = _lire("figure1_delta_discontinuite.csv")
-    df_zero = _lire("figure1_spot_zero_vega.csv")
+def section_figureA():
+    df_delta = _lire("figureA_delta_discontinuite.csv")
+    df_zero = _lire("figureA_spot_zero_vega.csv")
 
     delta_bas = df_delta.loc[df_delta["position"].str.contains("sous"), "delta"].iloc[0]
     delta_haut = df_delta.loc[df_delta["position"].str.contains("dessus"), "delta"].iloc[0]
@@ -61,7 +61,7 @@ def section_figure1():
     erreur_std_zero = df_zero["erreur_std_pct"].iloc[0]
 
     lignes = [
-        "## Figure 1 — Sensibilités du PDI et de l'autocall",
+        "## Figure A — Sensibilités du PDI et de l'autocall",
         "",
         "| Grandeur | Valeur |",
         "|---|---|",
@@ -73,12 +73,12 @@ def section_figure1():
     return "\n".join(lignes)
 
 
-def section_figure3():
-    df_vol = _lire("figure3_distribution_vol_realisee.csv")
-    df_v = _lire("figure3_scenario_v_resume.csv")
+def section_figureC():
+    df_vol = _lire("figureC_distribution_vol_realisee.csv")
+    df_v = _lire("figureC_scenario_v_resume.csv")
 
     lignes = [
-        "## Figure 3 — Indice Volatility Target",
+        "## Figure C — Indice Volatility Target",
         "",
         "| Grandeur | Valeur |",
         "|---|---|",
@@ -103,13 +103,13 @@ def main():
     contenu = "\n\n".join([
         "# Résultats numériques du mémoire",
         "Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par "
-        "`scripts/fig1_sensibilites_pdi_autocall.py`, `fig2_autocall_vs_decrement.py` et "
-        "`fig3_volatility_target.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). "
+        "`scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py` et "
+        "`figC_volatility_target.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). "
         "**Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer "
         "si un paramètre ou une seed change.",
-        section_figure1(),
-        section_figure2(),
-        section_figure3(),
+        section_figureA(),
+        section_figureB(),
+        section_figureC(),
     ])
     chemin = os.path.join(REPERTOIRE_RACINE, "RESULTATS.md")
     with open(chemin, "w") as f:

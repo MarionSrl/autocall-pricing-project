@@ -1,4 +1,4 @@
-"""Figure 1 — Sensibilités du PDI et de l'autocall (section III.1.1 du mémoire).
+"""Figure A — Sensibilités du PDI et de l'autocall (section III.1.1 du mémoire).
 
 Panneau (a) : le PDI seul, en formule fermée (Bouzoubaa & Osseiran §10.2.2,
 cas H<K ; équivalent Hull ch.26). PDI 100/60, maturité 1 an. Prix, delta
@@ -20,8 +20,8 @@ Validations obligatoires (voir aussi tests/test_barrier_options.py) :
 KI + KO = vanille sur la formule fermée, et convergence MC vers la formule
 fermée pour le PDI (écart < 0.5% à 200k trajectoires).
 
-Écrit figures/figure1_sensibilites_pdi_autocall.png (300 dpi) et les résultats
-numériques dans figures/figure1_*.{csv,md}.
+Écrit figures/figureA_sensibilites_pdi_autocall.png (300 dpi) et les résultats
+numériques dans figures/figureA_*.{csv,md}.
 """
 
 import os
@@ -50,12 +50,12 @@ from src.coupon_solver import resoudre_coupon_pair
 from src.style_graphique import appliquer_style, PALETTE
 from src.reporting import ecrire_csv_et_md
 
-# Marché (identique à la Figure 2)
+# Marché (identique à la Figure B)
 R = 0.025
 Q = 0.03
 SIGMA = 0.18
 # D, K : paramètres de décrément requis par la signature de simuler_indices
-# (Figure 2), mais sans effet sur l'indice A qu'on en extrait ici.
+# (Figure B), mais sans effet sur l'indice A qu'on en extrait ici.
 D_INUTILISE = 0.05
 K_INUTILISE = 5.0
 NB_PAS_AN = 252
@@ -126,7 +126,7 @@ def valider_formule_fermee():
 
 def resoudre_coupon_reference():
     """Coupon au pair du cas A (indice classique), calculé EXACTEMENT comme dans
-    scripts/fig2_autocall_vs_decrement.py (même simuler_indices, même seed, même
+    scripts/figB_autocall_vs_decrement.py (même simuler_indices, même seed, même
     grille quotidienne) : la spec impose une seule seed globale, donc la même
     quantité (coupon au pair de l'indice classique à spot=100) doit ressortir au
     même chiffre dans les deux figures. Un simuler_trajectoires_bs séparé à 10 pas
@@ -254,7 +254,7 @@ def tracer_figure(df_a, df_b):
     ax_vega_ac.legend(fontsize=8, loc="best")
 
     fig.tight_layout()
-    chemin = os.path.join(REPERTOIRE_FIGURES, "figure1_sensibilites_pdi_autocall.png")
+    chemin = os.path.join(REPERTOIRE_FIGURES, "figureA_sensibilites_pdi_autocall.png")
     fig.savefig(chemin, dpi=300)
     plt.close(fig)
     print(f"Figure enregistrée : {chemin}")
@@ -290,16 +290,16 @@ def main():
         "erreur_std_pct": erreur_std_zero * 100,
     }])
 
-    ecrire_csv_et_md(df_a, os.path.join(REPERTOIRE_FIGURES, "figure1_pdi_formule_fermee"), float_format="{:.4f}")
+    ecrire_csv_et_md(df_a, os.path.join(REPERTOIRE_FIGURES, "figureA_pdi_formule_fermee"), float_format="{:.4f}")
     # table Markdown allégée (points ronds) pour recopie directe dans le mémoire
     spots_ronds = np.arange(40, 131, 10)
     df_a_md = df_a[df_a["spot"].round(0).isin(spots_ronds)]
-    ecrire_csv_et_md(df_a_md, os.path.join(REPERTOIRE_FIGURES, "figure1_pdi_formule_fermee_resume"), float_format="{:.4f}")
+    ecrire_csv_et_md(df_a_md, os.path.join(REPERTOIRE_FIGURES, "figureA_pdi_formule_fermee_resume"), float_format="{:.4f}")
 
-    ecrire_csv_et_md(df_validations, os.path.join(REPERTOIRE_FIGURES, "figure1_validations"), float_format="{:.4f}")
-    ecrire_csv_et_md(df_b, os.path.join(REPERTOIRE_FIGURES, "figure1_autocall_vega"), float_format="{:.4f}")
-    ecrire_csv_et_md(df_delta_discontinuite, os.path.join(REPERTOIRE_FIGURES, "figure1_delta_discontinuite"), float_format="{:.4f}")
-    ecrire_csv_et_md(df_zero_vega, os.path.join(REPERTOIRE_FIGURES, "figure1_spot_zero_vega"), float_format="{:.4f}")
+    ecrire_csv_et_md(df_validations, os.path.join(REPERTOIRE_FIGURES, "figureA_validations"), float_format="{:.4f}")
+    ecrire_csv_et_md(df_b, os.path.join(REPERTOIRE_FIGURES, "figureA_autocall_vega"), float_format="{:.4f}")
+    ecrire_csv_et_md(df_delta_discontinuite, os.path.join(REPERTOIRE_FIGURES, "figureA_delta_discontinuite"), float_format="{:.4f}")
+    ecrire_csv_et_md(df_zero_vega, os.path.join(REPERTOIRE_FIGURES, "figureA_spot_zero_vega"), float_format="{:.4f}")
 
     tracer_figure(df_a, df_b)
     print(f"Terminé en {time.time() - t0:.1f}s")

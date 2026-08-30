@@ -23,9 +23,9 @@ def simuler_trajectoires_bs(s0, drift, sigma, T, nb_pas, nb_sim, seed, antitheti
     (dS = drift*S dt + sigma*S dW) sur une grille de nb_pas pas de temps,
     de façon vectorisée (somme cumulative des log-rendements).
 
-    Un seul sous-jacent : utilisé pour la Figure 1 (PDI / autocall vanille).
+    Un seul sous-jacent : utilisé pour la Figure A (PDI / autocall vanille).
     Pour comparer plusieurs indices sur les mêmes trajectoires browniennes
-    (Figure 2), voir src/indices.py::simuler_indices.
+    (Figure B), voir src/indices.py::simuler_indices.
     """
     dt = T / nb_pas
     if antithetique:

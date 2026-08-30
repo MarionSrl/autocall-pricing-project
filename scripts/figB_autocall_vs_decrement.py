@@ -1,4 +1,4 @@
-"""Figure 2 — Autocall classique vs décrément (section III.1.3 du mémoire).
+"""Figure B — Autocall classique vs décrément (section III.1.3 du mémoire).
 
 Compare, pour un autocall 10 ans / observations annuelles / PDI 60% à maturité :
     A             indice classique (price return)
@@ -18,8 +18,8 @@ Pour chacun : coupon au pair (solveur Brent, trajectoires figées), distribution
 des dates de rappel, probabilité d'activation du PDI, perte moyenne
 conditionnelle, et forward théorique à maturité de l'indice sous-jacent (la
 variable qui explique l'essentiel des écarts de coupon entre cas). Écrit
-figures/figure2_autocall_vs_decrement.png (300 dpi) et
-figures/figure2_resultats.{csv,md}.
+figures/figureB_autocall_vs_decrement.png (300 dpi) et
+figures/figureB_resultats.{csv,md}.
 """
 
 import os
@@ -159,7 +159,7 @@ def main():
 
     df = pd.DataFrame(lignes)
     os.makedirs(REPERTOIRE_FIGURES, exist_ok=True)
-    ecrire_csv_et_md(df, os.path.join(REPERTOIRE_FIGURES, "figure2_resultats"), float_format="{:.3f}")
+    ecrire_csv_et_md(df, os.path.join(REPERTOIRE_FIGURES, "figureB_resultats"), float_format="{:.3f}")
 
     tracer_figure(resultats)
     print(f"Terminé en {time.time() - t0:.1f}s")
@@ -213,7 +213,7 @@ def tracer_figure(resultats):
     ax.tick_params(axis="x", rotation=25)
 
     fig.tight_layout()
-    chemin = os.path.join(REPERTOIRE_FIGURES, "figure2_autocall_vs_decrement.png")
+    chemin = os.path.join(REPERTOIRE_FIGURES, "figureB_autocall_vs_decrement.png")
     fig.savefig(chemin, dpi=300)
     plt.close(fig)
     print(f"Figure enregistrée : {chemin}")

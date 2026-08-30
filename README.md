@@ -27,7 +27,7 @@ pytest tests/                # lance les 26 tests
 ```
 
 Chaque figure peut aussi être relancée seule, par exemple :
-`python scripts/fig2_autocall_vs_decrement.py`.
+`python scripts/figB_autocall_vs_decrement.py`.
 
 Toutes les simulations partagent la même seed (`src/marche.py::SEED_GLOBAL`), pour
 qu'une même quantité recalculée dans deux figures donne toujours le même chiffre.
@@ -41,17 +41,17 @@ capital (PDI) à 60 %, **observée à maturité uniquement**.
 
 ## Les 3 figures
 
-**Figure 2 — Autocall classique vs décrément** (`fig2_autocall_vs_decrement.py`).
+**Figure B — Autocall classique vs décrément** (`figB_autocall_vs_decrement.py`).
 Compare le coupon au pair, les probabilités de rappel et d'activation du PDI, et la
 perte conditionnelle, sur 6 cas : indice classique, décrément en %, décrément en
 points, barrière dégressive, et deux cas de contrôle (B′, C′).
 
-**Figure 1 — Sensibilités du PDI et de l'autocall** (`fig1_sensibilites_pdi_autocall.py`).
+**Figure A — Sensibilités du PDI et de l'autocall** (`figA_sensibilites_pdi_autocall.py`).
 Formule fermée d'un put down-and-in (prix, delta, vega, vanna), puis vega Monte Carlo
 de l'autocall complet, décomposé en jambe « sans PDI » et jambe « PDI ». Montre que le
 vega du PDI seul est de signe constant, contrairement à celui de l'autocall complet.
 
-**Figure 3 — Indice Volatility Target** (`fig3_volatility_target.py`). Indice construit
+**Figure C — Indice Volatility Target** (`figC_volatility_target.py`). Indice construit
 sur un modèle de volatilité à 2 régimes : trajectoire type, distribution de la vol
 réalisée face à la cible, et scénario de crash-rebond scripté.
 
@@ -63,10 +63,10 @@ Tous les chiffres (coupons, sensibilités, sous-participation...) sont dans
 - **Coupon à mémoire sans barrière indépendante** : le même niveau (100 %) déclenche à
   la fois le rappel et l'accumulation du coupon. Rien n'est versé à maturité si le
   produit n'a jamais été rappelé — ce qui pénalise mécaniquement les indices à
-  décrément dans la Figure 2, puisqu'ils retardent le rappel.
+  décrément dans la Figure B, puisqu'ils retardent le rappel.
 - **Deux notions de barrière, à ne pas confondre** : le PDI du produit (Figures 2 et
   1b) est une condition terminale, observée à maturité uniquement — pas de monitoring
-  continu. Le panneau (a) de la Figure 1 illustre séparément un *vrai* put
+  continu. Le panneau (a) de la Figure A illustre séparément un *vrai* put
   down-and-in à barrière continûment observée (formule fermée classique), dont la
   validation Monte Carlo utilise une correction de continuité par pont brownien.
 - **Pas de coûts de transaction** (réplication du décrément, rebalancement quotidien
@@ -100,7 +100,7 @@ condition terminale portant sur le seul niveau du sous-jacent à maturité, et n
 monitoring, discret ou continu, d'une barrière tout au long de la vie du produit — c'est
 la convention la plus fréquente en retail, et elle ne pose donc aucune ambiguïté de
 fréquence d'observation, ni ne nécessite de correction de type
-Broadie–Glasserman–Kou. Le panneau (a) de la Figure 1, en revanche, illustre un objet
+Broadie–Glasserman–Kou. Le panneau (a) de la Figure A, en revanche, illustre un objet
 différent : un véritable put down-and-in à barrière continûment observée, dans sa
 formulation fermée usuelle (Bouzoubaa & Osseiran ; Hull), qui sert de démonstration
 pédagogique du profil de sensibilités caractéristique des options à barrière, en
@@ -115,7 +115,7 @@ coupon indépendante de la barrière de rappel : à la date de rappel, le porteu
 l'ensemble des coupons annuels cumulés depuis l'origine, mais si le produit atteint la
 maturité sans avoir jamais été rappelé, aucun coupon n'est versé — seul le capital,
 protégé ou non selon le niveau du sous-jacent à l'échéance, est remboursé. Cette
-convention n'est pas neutre pour l'interprétation de la Figure 2 : les sous-jacents à
+convention n'est pas neutre pour l'interprétation de la Figure B : les sous-jacents à
 décrément retardant mécaniquement le rappel, ils augmentent la probabilité d'aller à
 maturité sans avoir jamais perçu de coupon, de sorte qu'une partie de la hausse du
 coupon facial qu'ils affichent au pair compense ce risque de ne rien percevoir, et pas
@@ -123,13 +123,13 @@ seulement le risque de perte en capital que mesure la probabilité d'activation 
 
 Aucun coût de transaction ni frais de gestion n'est par ailleurs pris en compte, que ce
 soit dans la réplication du décrément des indices B et C ou dans le rebalancement
-quotidien de l'indice à cible de volatilité de la Figure 3 entre le sous-jacent et le
+quotidien de l'indice à cible de volatilité de la Figure C entre le sous-jacent et le
 cash. Les mécanismes étudiés sont donc présentés dans leur configuration la plus
 favorable ; l'indice Volatility Target, dont l'exposition varie précisément le plus dans
 les phases où le mécanisme est le plus actif, verrait notamment sa performance amputée
 d'autant plus fortement par des coûts de rebalancement réalistes.
 
-Enfin, la volatilité sous-jacente à l'indice Volatility Target de la Figure 3 est
+Enfin, la volatilité sous-jacente à l'indice Volatility Target de la Figure C est
 modélisée par une chaîne de Markov à deux régimes — volatilité basse et volatilité de
 stress, avec des durées moyennes de séjour distinctes — plutôt que par un modèle à
 volatilité stochastique complet de type Heston. Ce choix se justifie par le fait que
