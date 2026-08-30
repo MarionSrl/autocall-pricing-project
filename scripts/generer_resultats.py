@@ -107,8 +107,8 @@ def main():
         "`fig3_volatility_target.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). "
         "**Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer "
         "si un paramètre ou une seed change.",
-        section_figure2(),
         section_figure1(),
+        section_figure2(),
         section_figure3(),
     ])
     chemin = os.path.join(REPERTOIRE_RACINE, "RESULTATS.md")
