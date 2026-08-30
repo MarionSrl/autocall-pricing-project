@@ -164,9 +164,15 @@ def calculer_panneau_b(coupon):
         jambe_sans_pdi_down, jambe_pdi_down = decomposer_legs_pdi(r_down, S_REF, R, DATES_OBS[-1])
         jambe_sans_pdi_up, jambe_pdi_up = decomposer_legs_pdi(r_up, S_REF, R, DATES_OBS[-1])
 
-        vega_total = (r_up.payoffs - r_down.payoffs) / (2 * DV_VEGA)
-        vega_sans_pdi = (jambe_sans_pdi_up - jambe_sans_pdi_down) / (2 * DV_VEGA)
-        vega_pdi = (jambe_pdi_up - jambe_pdi_down) / (2 * DV_VEGA)
+        # DV_VEGA est déjà le bump complet "1 point de vol" (0.01) : diviser
+        # par 2 (pas par 2*DV_VEGA) donne directement la variation de prix
+        # pour 1 point de vol (convention desk), pas la dérivée ∂prix/∂sigma
+        # extrapolée sur un déplacement complet de sigma de 0 à 1 (100x trop
+        # grande) -- cf. src/barrier_options.py::pdi_grecques pour la même
+        # convention sur le PDI seul (panneau a).
+        vega_total = (r_up.payoffs - r_down.payoffs) / 2
+        vega_sans_pdi = (jambe_sans_pdi_up - jambe_sans_pdi_down) / 2
+        vega_pdi = (jambe_pdi_up - jambe_pdi_down) / 2
 
         lignes.append({
             "spot": s0_test,
@@ -204,7 +210,7 @@ def vega_total_moyen(s0_test, coupon, seed=SEED):
     )[:, 1:]
     r_down = pricer_autocall(spots_down, S_REF, R, DATES_OBS, BARRIERE_AUTOCALL, coupon, BARRIERE_CAPITAL)
     r_up = pricer_autocall(spots_up, S_REF, R, DATES_OBS, BARRIERE_AUTOCALL, coupon, BARRIERE_CAPITAL)
-    vega = (r_up.payoffs - r_down.payoffs) / (2 * DV_VEGA)
+    vega = (r_up.payoffs - r_down.payoffs) / 2  # cf. calculer_panneau_b : /2, pas /(2*DV_VEGA)
     return vega.mean(), vega.std(ddof=1) / np.sqrt(len(vega))
 
 
