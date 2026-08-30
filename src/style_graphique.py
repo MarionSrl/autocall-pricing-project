@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # Palette cohérente pour les cas comparés dans le mémoire (indices A/B/C, leurs
 # variantes de contrôle B' et C', et la barrière dégressive). Réutilisée par
-# les Figures 1, 2 et 3.
+# les Figures A, B, C et D.
 PALETTE = {
     "A": "#1f77b4",
     "B": "#ff7f0e",

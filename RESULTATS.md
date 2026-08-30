@@ -1,6 +1,6 @@
 # Résultats numériques du mémoire
 
-Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par `scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py` et `figC_volatility_target.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). **Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer si un paramètre ou une seed change.
+Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par `scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py`, `figC_volatility_target.py` et `figD_hedging_produit_notebook.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). **Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer si un paramètre ou une seed change.
 
 ## Figure A — Sensibilités du PDI et de l'autocall
 
@@ -31,3 +31,29 @@ Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV p
 | Sous-participation au rebond, fenêtre 60j | 18.27 pts |
 | Écart indice nu − indice VT en fin de scénario, fenêtre 20j | 17.83 pts |
 | Écart indice nu − indice VT en fin de scénario, fenêtre 60j | 18.31 pts |
+
+## Figure D — Delta hedging et risques résiduels de couverture
+
+*Porte sur le produit du notebook (5 ans, coupon fixe 7%, vol modèle 20%), distinct du produit de référence des Figures A-C -- voir le README.*
+
+| Grandeur | Valeur |
+|---|---|
+| Gamma moyen du portefeuille (dollar-gamma, scénario de référence) | -0.02605 |
+| Temps de sortie moyen (rappel ou maturité), scénario de référence | 2.35 ans |
+| Prix initial (modèle) | 98.09 % |
+| Trajectoires de la grille delta/gamma | 10000 |
+| Trajectoires de couverture par scénario | 2000 |
+
+| Vol réalisée (%) | PnL moyen | PnL théorique (gamma-trading) |
+|---|---|---|
+| 15.00 | -2.52 | -3.94 |
+| 20.00 | 1.16 | -0.00 |
+| 25.00 | 5.02 | 5.07 |
+| 30.00 | 8.34 | 11.27 |
+
+| Fréquence de rebalancement | PnL moyen | Écart-type du PnL |
+|---|---|---|
+| 1j | 0.93 | 7.68 |
+| 5j | 0.84 | 7.50 |
+| 10j | 1.29 | 8.05 |
+| 20j | 1.19 | 8.22 |
