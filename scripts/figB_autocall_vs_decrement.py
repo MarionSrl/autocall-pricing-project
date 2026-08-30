@@ -65,6 +65,9 @@ SEED = SEED_GLOBAL  # source unique : src/marche.py::SEED_GLOBAL
 REPERTOIRE_RACINE = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 REPERTOIRE_FIGURES = os.path.join(REPERTOIRE_RACINE, "figures")
 
+COULEUR_PROBA_PDI = PALETTE["A"]
+COULEUR_PERTE_COND = "#d62728"
+
 
 def construire_cas(indices):
     barriere_plate = np.full(len(DATES_OBS), BARRIERE_AUTOCALL)
@@ -167,7 +170,8 @@ def main():
 
 def tracer_figure(resultats):
     appliquer_style()
-    fig, axes = plt.subplots(2, 2, figsize=(12, 9))
+    fig = plt.figure(figsize=(12, 9))
+    gs = fig.add_gridspec(2, 2, height_ratios=[1, 1])
 
     noms = ORDRE_CAS
     couleurs = [PALETTE[n] for n in noms]
@@ -176,14 +180,14 @@ def tracer_figure(resultats):
     n_cas = len(noms)
 
     # (a) coupon au pair
-    ax = axes[0, 0]
+    ax = fig.add_subplot(gs[0, 0])
     coupons = [resultats[n]["coupon_pair"] * 100 for n in noms]
     ax.bar(libelles_courts, coupons, color=couleurs)
     ax.set_ylabel("Coupon annuel au pair (%)")
     ax.tick_params(axis="x", rotation=25)
 
     # (b) distribution des dates de rappel + probabilité d'aller à maturité
-    ax = axes[0, 1]
+    ax = fig.add_subplot(gs[0, 1])
     largeur = 0.8 / n_cas
     x_dates = np.arange(len(DATES_OBS) + 1)
     etiquettes_x = [f"t={int(t)}" for t in DATES_OBS] + ["maturité"]
@@ -198,19 +202,22 @@ def tracer_figure(resultats):
     ax.set_ylabel("Probabilité (%)")
     ax.legend(fontsize=6.5, loc="upper right")
 
-    # (c) probabilité d'activation du PDI
-    ax = axes[1, 0]
+    # (c) risque : probabilité d'activation du PDI + perte moyenne
+    # conditionnelle, barres groupées -- les deux sont déjà des pourcentages
+    # (même unité), un axe partagé est donc plus honnête qu'un double axe.
+    ax = fig.add_subplot(gs[1, :])
+    x = np.arange(n_cas)
+    largeur_risque = 0.35
     probas_pdi = [resultats[n]["proba_pdi"] * 100 for n in noms]
-    ax.bar(libelles_courts, probas_pdi, color=couleurs)
-    ax.set_ylabel("Probabilité d'activation du PDI (%)")
-    ax.tick_params(axis="x", rotation=25)
-
-    # (d) perte moyenne conditionnelle sachant activation du PDI
-    ax = axes[1, 1]
     pertes = [resultats[n]["perte_cond"] * 100 for n in noms]
-    ax.bar(libelles_courts, pertes, color=couleurs)
-    ax.set_ylabel("Perte moy. conditionnelle sachant\nactivation du PDI (%)")
-    ax.tick_params(axis="x", rotation=25)
+    ax.bar(x - largeur_risque / 2, probas_pdi, width=largeur_risque,
+           color=COULEUR_PROBA_PDI, label="Probabilité d'activation du PDI")
+    ax.bar(x + largeur_risque / 2, pertes, width=largeur_risque,
+           color=COULEUR_PERTE_COND, label="Perte moy. conditionnelle sachant activation du PDI")
+    ax.set_xticks(x)
+    ax.set_xticklabels(libelles_courts, rotation=25)
+    ax.set_ylabel("Pourcentage (%)")
+    ax.legend(fontsize=8)
 
     fig.tight_layout()
     chemin = os.path.join(REPERTOIRE_FIGURES, "figureB_autocall_vs_decrement.png")

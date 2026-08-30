@@ -10,6 +10,8 @@ Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV p
 | Delta du PDI juste au-dessus de la barrière (spot=60.01) | -2.52 |
 | Spot où le vega total de l'autocall s'annule | 71.05 |
 | Vega total à ce spot (résiduel MC, erreur std 0.02 pt) | -0.00 % |
+| Validation formule fermée : parité KI+KO=vanille (écart max sur 6 spots) | 0.00 % |
+| Validation formule fermée : convergence MC (spot=70, 200 000 traj.) | 0.25 % |
 
 ## Figure B — Autocall classique vs décrément
 
@@ -27,10 +29,17 @@ Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV p
 | Grandeur | Valeur |
 |---|---|
 | Vol réalisée moyenne de l'indice VT (cible 15.00 %) | 16.01 % |
+| Vol réalisée médiane de l'indice VT | 16.03 % |
+| Écart-type de la vol réalisée de l'indice VT | 1.31 pt |
+| Proportion de trajectoires dans ±2 pt de la cible | 76.00 % |
+| Temps passé à l'exposition plafond (L_max) sur la trajectoire type | 29.82 % |
 | Sous-participation au rebond, fenêtre 20j | 17.55 pts |
 | Sous-participation au rebond, fenêtre 60j | 18.27 pts |
 | Écart indice nu − indice VT en fin de scénario, fenêtre 20j | 17.83 pts |
 | Écart indice nu − indice VT en fin de scénario, fenêtre 60j | 18.31 pts |
+| Niveau plancher (creux) de l'indice nu dans le scénario V | 70.00 |
+| Niveau plancher (creux) de l'indice VT dans le scénario V, fenêtre 20j | 63.79 |
+| Niveau plancher (creux) de l'indice VT dans le scénario V, fenêtre 60j | 61.17 |
 
 ## Figure D — Delta hedging et risques résiduels de couverture
 
@@ -39,21 +48,22 @@ Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV p
 | Grandeur | Valeur |
 |---|---|
 | Gamma moyen du portefeuille (dollar-gamma, scénario de référence) | -0.02605 |
+| Gamma×spot² moyen réalisé (utilisé pour la courbe théorique) | -191.57418 |
 | Temps de sortie moyen (rappel ou maturité), scénario de référence | 2.35 ans |
 | Prix initial (modèle) | 98.09 % |
 | Trajectoires de la grille delta/gamma | 10000 |
 | Trajectoires de couverture par scénario | 2000 |
 
-| Vol réalisée (%) | PnL moyen | PnL théorique (gamma-trading) |
-|---|---|---|
-| 15.00 | -2.52 | -3.94 |
-| 20.00 | 1.16 | -0.00 |
-| 25.00 | 5.02 | 5.07 |
-| 30.00 | 8.34 | 11.27 |
+| Vol réalisée (%) | PnL moyen | Erreur std | PnL théorique (gamma-trading) |
+|---|---|---|---|
+| 15.00 | -2.52 | 0.14 | -3.94 |
+| 20.00 | 1.16 | 0.17 | -0.00 |
+| 25.00 | 5.02 | 0.24 | 5.07 |
+| 30.00 | 8.34 | 0.30 | 11.27 |
 
-| Fréquence de rebalancement | PnL moyen | Écart-type du PnL |
-|---|---|---|
-| 1j | 0.93 | 7.68 |
-| 5j | 0.84 | 7.50 |
-| 10j | 1.29 | 8.05 |
-| 20j | 1.19 | 8.22 |
+| Fréquence de rebalancement | PnL moyen | Écart-type du PnL | Erreur std |
+|---|---|---|---|
+| 1j | 0.93 | 7.68 | 0.17 |
+| 5j | 0.84 | 7.50 | 0.17 |
+| 10j | 1.29 | 8.05 | 0.18 |
+| 20j | 1.19 | 8.22 | 0.18 |

@@ -53,12 +53,18 @@ def section_figureB():
 def section_figureA():
     df_delta = _lire("figureA_delta_discontinuite.csv")
     df_zero = _lire("figureA_spot_zero_vega.csv")
+    df_val = _lire("figureA_validations.csv")
 
     delta_bas = df_delta.loc[df_delta["position"].str.contains("sous"), "delta"].iloc[0]
     delta_haut = df_delta.loc[df_delta["position"].str.contains("dessus"), "delta"].iloc[0]
     spot_zero = df_zero["spot_zero_vega"].iloc[0]
     vega_zero = df_zero["vega_pct"].iloc[0]
     erreur_std_zero = df_zero["erreur_std_pct"].iloc[0]
+
+    parite = df_val[df_val["validation"].str.contains("KI+KO", regex=False)]
+    ecart_parite_max = parite["ecart_relatif_pct"].max()
+    mc = df_val[df_val["validation"].str.contains("MC vs formule", regex=False)]
+    ecart_mc = mc["ecart_relatif_pct"].iloc[0]
 
     lignes = [
         "## Figure A — Sensibilités du PDI et de l'autocall",
@@ -69,6 +75,8 @@ def section_figureA():
         f"| Delta du PDI juste au-dessus de la barrière (spot=60.01) | {_fmt(delta_haut)} |",
         f"| Spot où le vega total de l'autocall s'annule | {_fmt(spot_zero)} |",
         f"| Vega total à ce spot (résiduel MC, erreur std {_fmt(erreur_std_zero)} pt) | {_fmt(vega_zero)} % |",
+        f"| Validation formule fermée : parité KI+KO=vanille (écart max sur 6 spots) | {_fmt(ecart_parite_max)} % |",
+        f"| Validation formule fermée : convergence MC (spot=70, 200 000 traj.) | {_fmt(ecart_mc)} % |",
     ]
     return "\n".join(lignes)
 
@@ -76,6 +84,7 @@ def section_figureA():
 def section_figureC():
     df_vol = _lire("figureC_distribution_vol_realisee.csv")
     df_v = _lire("figureC_scenario_v_resume.csv")
+    df_traj = _lire("figureC_trajectoire_type_resume.csv")
 
     lignes = [
         "## Figure C — Indice Volatility Target",
@@ -84,6 +93,11 @@ def section_figureC():
         "|---|---|",
         f"| Vol réalisée moyenne de l'indice VT (cible {_fmt(df_vol['sigma_cible_pct'].iloc[0])} %) | "
         f"{_fmt(df_vol['vol_realisee_moyenne_pct'].iloc[0])} % |",
+        f"| Vol réalisée médiane de l'indice VT | {_fmt(df_vol['vol_realisee_mediane_pct'].iloc[0])} % |",
+        f"| Écart-type de la vol réalisée de l'indice VT | {_fmt(df_vol['vol_realisee_ecart_type_pct'].iloc[0])} pt |",
+        f"| Proportion de trajectoires dans ±2 pt de la cible | {_fmt(df_vol['proba_dans_plus_ou_moins_2pt_pct'].iloc[0])} % |",
+        f"| Temps passé à l'exposition plafond (L_max) sur la trajectoire type | "
+        f"{_fmt(df_traj['pct_temps_exposition_plafond'].iloc[0])} % |",
     ]
     for _, ligne in df_v.iterrows():
         fenetre = int(ligne["fenetre_jours"])
@@ -95,6 +109,16 @@ def section_figureC():
         ecart_fin = 100.0 - ligne["niveau_indice_vt_fin_episode"]
         lignes.append(
             f"| Écart indice nu − indice VT en fin de scénario, fenêtre {fenetre}j | {_fmt(ecart_fin)} pts |"
+        )
+    lignes.append(
+        f"| Niveau plancher (creux) de l'indice nu dans le scénario V | "
+        f"{_fmt(df_v['niveau_plancher_indice_nu'].iloc[0])} |"
+    )
+    for _, ligne in df_v.iterrows():
+        fenetre = int(ligne["fenetre_jours"])
+        lignes.append(
+            f"| Niveau plancher (creux) de l'indice VT dans le scénario V, fenêtre {fenetre}j | "
+            f"{_fmt(ligne['niveau_plancher_indice_vt'])} |"
         )
     return "\n".join(lignes)
 
@@ -114,26 +138,29 @@ def section_figureD():
         "| Grandeur | Valeur |",
         "|---|---|",
         f"| Gamma moyen du portefeuille (dollar-gamma, scénario de référence) | {resume['gamma_moyen_dollar']:.5f} |",
+        f"| Gamma×spot² moyen réalisé (utilisé pour la courbe théorique) | {resume['gamma_s2_moyen']:.5f} |",
         f"| Temps de sortie moyen (rappel ou maturité), scénario de référence | {_fmt(resume['temps_sortie_moyen_annees'])} ans |",
         f"| Prix initial (modèle) | {_fmt(resume['prix_initial_pct'])} % |",
         f"| Trajectoires de la grille delta/gamma | {int(resume['nb_trajectoires_grille_delta'])} |",
         f"| Trajectoires de couverture par scénario | {int(resume['nb_trajectoires_couverture_par_scenario'])} |",
         "",
-        "| Vol réalisée (%) | PnL moyen | PnL théorique (gamma-trading) |",
-        "|---|---|---|",
+        "| Vol réalisée (%) | PnL moyen | Erreur std | PnL théorique (gamma-trading) |",
+        "|---|---|---|---|",
     ]
     for _, ligne in df_vol.iterrows():
         lignes.append(
-            f"| {_fmt(ligne['vol_realisee_pct'])} | {_fmt(ligne['pnl_moyen'])} | {_fmt(ligne['pnl_theorique'])} |"
+            f"| {_fmt(ligne['vol_realisee_pct'])} | {_fmt(ligne['pnl_moyen'])} | {_fmt(ligne['pnl_erreur_std'])} | "
+            f"{_fmt(ligne['pnl_theorique'])} |"
         )
     lignes += [
         "",
-        "| Fréquence de rebalancement | PnL moyen | Écart-type du PnL |",
-        "|---|---|---|",
+        "| Fréquence de rebalancement | PnL moyen | Écart-type du PnL | Erreur std |",
+        "|---|---|---|---|",
     ]
     for _, ligne in df_freq.iterrows():
         lignes.append(
-            f"| {int(ligne['freq_rebal_jours'])}j | {_fmt(ligne['pnl_moyen'])} | {_fmt(ligne['pnl_ecart_type'])} |"
+            f"| {int(ligne['freq_rebal_jours'])}j | {_fmt(ligne['pnl_moyen'])} | {_fmt(ligne['pnl_ecart_type'])} | "
+            f"{_fmt(ligne['pnl_erreur_std'])} |"
         )
     return "\n".join(lignes)
 

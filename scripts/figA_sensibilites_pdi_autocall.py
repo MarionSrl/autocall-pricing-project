@@ -79,6 +79,7 @@ REPERTOIRE_RACINE = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."
 REPERTOIRE_FIGURES = os.path.join(REPERTOIRE_RACINE, "figures")
 
 COULEUR_A = PALETTE["A"]
+COULEUR_VEGA = PALETTE["B"]
 COULEUR_SANS_PDI = "#2ca02c"
 COULEUR_PDI = "#d62728"
 
@@ -225,19 +226,37 @@ def trouver_spot_zero_vega(coupon, borne_basse=68.0, borne_haute=76.0):
 
 def tracer_figure(df_a, df_b):
     appliquer_style()
-    fig = plt.figure(figsize=(15, 9))
-    gs = fig.add_gridspec(2, 4, height_ratios=[1, 1.1])
+    fig = plt.figure(figsize=(12, 9))
+    gs = fig.add_gridspec(2, 3, height_ratios=[1, 1.1])
 
     ax_prix = fig.add_subplot(gs[0, 0])
     ax_delta = fig.add_subplot(gs[0, 1])
-    ax_vega = fig.add_subplot(gs[0, 2])
-    ax_vanna = fig.add_subplot(gs[0, 3])
+    ax_vanna = fig.add_subplot(gs[0, 2])
     ax_vega_ac = fig.add_subplot(gs[1, :])
 
+    # Prix + vega du PDI sur un même panneau, deux échelles (unités
+    # différentes : prix en points d'indice, vega en % de prix pour 1 pt de
+    # vol) -- vega tracé en pointillés pour rester lisible même superposé au
+    # prix près de la barrière, où les deux courbes se rapprochent en valeur.
+    ax_prix.plot(df_a["spot"], df_a["prix"], color=COULEUR_A, linewidth=1.3, label="Prix")
+    ax_prix.axvline(H_PDI, color="grey", linestyle="--", linewidth=0.8)
+    ax_prix.axvline(K_PDI, color="grey", linestyle=":", linewidth=0.8)
+    ax_prix.set_xlabel("Spot (% du niveau initial)")
+    ax_prix.set_ylabel("Prix du PDI", color=COULEUR_A)
+    ax_prix.tick_params(axis="y", labelcolor=COULEUR_A)
+
+    ax_vega = ax_prix.twinx()
+    ax_vega.plot(df_a["spot"], df_a["vega"], color=COULEUR_VEGA, linewidth=1.3,
+                 linestyle="--", label="Vega")
+    ax_vega.set_ylabel("Vega du PDI (pour 1 pt de vol)", color=COULEUR_VEGA)
+    ax_vega.tick_params(axis="y", labelcolor=COULEUR_VEGA)
+    ax_vega.grid(False)
+    lignes_prix, labels_prix = ax_prix.get_legend_handles_labels()
+    lignes_vega, labels_vega = ax_vega.get_legend_handles_labels()
+    ax_prix.legend(lignes_prix + lignes_vega, labels_prix + labels_vega, fontsize=8, loc="upper right")
+
     for ax, col, ylabel in [
-        (ax_prix, "prix", "Prix du PDI"),
         (ax_delta, "delta", "Delta du PDI"),
-        (ax_vega, "vega", "Vega du PDI (pour 1 pt de vol)"),
         (ax_vanna, "vanna", "Vanna du PDI"),
     ]:
         ax.plot(df_a["spot"], df_a[col], color=COULEUR_A, linewidth=1.3)
