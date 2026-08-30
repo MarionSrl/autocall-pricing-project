@@ -30,6 +30,7 @@ import matplotlib.pyplot as plt
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src.marche import SEED_GLOBAL
 from src.vol_target import (
     simuler_regimes,
     simuler_indice_sous_jacent,
@@ -44,7 +45,7 @@ R = 0.025
 Q = 0.03
 S0 = 100.0
 NB_PAS_AN = 252
-SEED = 2026
+SEED = SEED_GLOBAL  # source unique : src/marche.py::SEED_GLOBAL
 
 # Modèle de volatilité à 2 régimes (cf. src/vol_target.py pour la justification)
 SIGMA_BAS = 0.09

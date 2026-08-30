@@ -42,6 +42,7 @@ from src.barrier_options import (
     bs_put,
     mc_put_down_and_in,
 )
+from src.marche import SEED_GLOBAL
 from src.simulation import simuler_trajectoires_bs
 from src.indices import simuler_indices
 from src.pricer_autocall import pricer_autocall, decomposer_legs_pdi
@@ -72,7 +73,7 @@ BARRIERE_AUTOCALL = 1.0
 BARRIERE_CAPITAL = 0.60
 NB_SIM = 200_000
 DV_VEGA = 0.01  # bump de vol +/-1pt
-SEED = 2026
+SEED = SEED_GLOBAL  # source unique : src/marche.py::SEED_GLOBAL
 
 REPERTOIRE_RACINE = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 REPERTOIRE_FIGURES = os.path.join(REPERTOIRE_RACINE, "figures")
