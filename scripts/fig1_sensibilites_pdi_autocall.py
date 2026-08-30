@@ -31,6 +31,7 @@ import time
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.optimize import brentq
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -42,6 +43,7 @@ from src.barrier_options import (
     mc_put_down_and_in,
 )
 from src.simulation import simuler_trajectoires_bs
+from src.indices import simuler_indices
 from src.pricer_autocall import pricer_autocall, decomposer_legs_pdi
 from src.coupon_solver import resoudre_coupon_pair
 from src.style_graphique import appliquer_style, PALETTE
@@ -51,6 +53,11 @@ from src.reporting import ecrire_csv_et_md
 R = 0.025
 Q = 0.03
 SIGMA = 0.18
+# D, K : paramètres de décrément requis par la signature de simuler_indices
+# (Figure 2), mais sans effet sur l'indice A qu'on en extrait ici.
+D_INUTILISE = 0.05
+K_INUTILISE = 5.0
+NB_PAS_AN = 252
 
 # Panneau (a) : PDI seul
 K_PDI = 100.0
@@ -117,9 +124,19 @@ def valider_formule_fermee():
 
 
 def resoudre_coupon_reference():
-    spots_obs = simuler_trajectoires_bs(
-        S_REF, R - Q, SIGMA, MATURITE, len(DATES_OBS), NB_SIM, SEED
-    )[:, 1:]
+    """Coupon au pair du cas A (indice classique), calculé EXACTEMENT comme dans
+    scripts/fig2_autocall_vs_decrement.py (même simuler_indices, même seed, même
+    grille quotidienne) : la spec impose une seule seed globale, donc la même
+    quantité (coupon au pair de l'indice classique à spot=100) doit ressortir au
+    même chiffre dans les deux figures. Un simuler_trajectoires_bs séparé à 10 pas
+    annuels, même à seed identique, tire un nombre différent de gaussiennes par
+    trajectoire et ne reproduit donc PAS les mêmes trajectoires -- d'où l'écart
+    (11.83% vs 11.81%) observé avant cette correction.
+    """
+    indices = simuler_indices(
+        S_REF, R, Q, SIGMA, D_INUTILISE, K_INUTILISE, MATURITE, NB_PAS_AN, DATES_OBS, NB_SIM, SEED
+    )
+    spots_obs = indices["A"][:, 1:]
     coupon, _ = resoudre_coupon_pair(spots_obs, S_REF, R, DATES_OBS, BARRIERE_AUTOCALL, BARRIERE_CAPITAL)
     return coupon
 
@@ -160,6 +177,43 @@ def calculer_panneau_b(coupon):
             "vega_leg_pdi_pct": vega_pdi.mean() * 100,
         })
     return pd.DataFrame(lignes)
+
+
+def calculer_discontinuite_delta(epsilon=0.01, h_spot_rel=1e-6):
+    """Delta juste sous et juste au-dessus de la barrière (H +/- epsilon), avec
+    un pas de différences finies assez petit (h_spot_rel) pour ne pas enjamber
+    la barrière et donc ne pas moyenner les deux régimes."""
+    delta_bas = pdi_grecques(H_PDI - epsilon, K_PDI, H_PDI, R, Q, SIGMA, T_PDI, h_spot_rel=h_spot_rel)["delta"]
+    delta_haut = pdi_grecques(H_PDI + epsilon, K_PDI, H_PDI, R, Q, SIGMA, T_PDI, h_spot_rel=h_spot_rel)["delta"]
+    return pd.DataFrame([
+        {"spot": H_PDI - epsilon, "position": "juste sous la barrière", "delta": float(delta_bas)},
+        {"spot": H_PDI + epsilon, "position": "juste au-dessus de la barrière", "delta": float(delta_haut)},
+    ])
+
+
+def vega_total_moyen(s0_test, coupon, seed=SEED):
+    """Vega total moyen (MC, differencing commun), à seed FIXE (contrairement
+    au balayage de calculer_panneau_b) pour que la fonction soit bien définie
+    pendant la recherche de racine ci-dessous."""
+    spots_down = simuler_trajectoires_bs(
+        s0_test, R - Q, SIGMA - DV_VEGA, MATURITE, len(DATES_OBS), NB_SIM, seed
+    )[:, 1:]
+    spots_up = simuler_trajectoires_bs(
+        s0_test, R - Q, SIGMA + DV_VEGA, MATURITE, len(DATES_OBS), NB_SIM, seed
+    )[:, 1:]
+    r_down = pricer_autocall(spots_down, S_REF, R, DATES_OBS, BARRIERE_AUTOCALL, coupon, BARRIERE_CAPITAL)
+    r_up = pricer_autocall(spots_up, S_REF, R, DATES_OBS, BARRIERE_AUTOCALL, coupon, BARRIERE_CAPITAL)
+    vega = (r_up.payoffs - r_down.payoffs) / (2 * DV_VEGA)
+    return vega.mean(), vega.std(ddof=1) / np.sqrt(len(vega))
+
+
+def trouver_spot_zero_vega(coupon, borne_basse=68.0, borne_haute=76.0):
+    """Spot où le vega total MC de l'autocall s'annule (dichotomie de Brent,
+    seed fixe). Le vega décroît régulièrement de positif à négatif sur cette
+    plage (vérifié empiriquement), la recherche de racine est donc bien posée."""
+    spot_zero = brentq(lambda s: vega_total_moyen(s, coupon)[0], borne_basse, borne_haute, xtol=0.005)
+    vega_au_zero, erreur_std = vega_total_moyen(spot_zero, coupon)
+    return spot_zero, vega_au_zero, erreur_std
 
 
 def tracer_figure(df_a, df_b):
@@ -222,6 +276,19 @@ def main():
     print("Panneau (b) : vega de l'autocall complet par Monte Carlo...")
     df_b = calculer_panneau_b(coupon)
 
+    print("Discontinuité de delta à la barrière...")
+    df_delta_discontinuite = calculer_discontinuite_delta()
+    print(df_delta_discontinuite.to_string(index=False))
+
+    print("Recherche du spot où le vega total de l'autocall s'annule...")
+    spot_zero, vega_au_zero, erreur_std_zero = trouver_spot_zero_vega(coupon)
+    print(f"  spot = {spot_zero:.2f}  (vega = {vega_au_zero * 100:.4f}%, erreur std = {erreur_std_zero * 100:.4f}%)")
+    df_zero_vega = pd.DataFrame([{
+        "spot_zero_vega": spot_zero,
+        "vega_pct": vega_au_zero * 100,
+        "erreur_std_pct": erreur_std_zero * 100,
+    }])
+
     ecrire_csv_et_md(df_a, os.path.join(REPERTOIRE_FIGURES, "figure1_pdi_formule_fermee"), float_format="{:.4f}")
     # table Markdown allégée (points ronds) pour recopie directe dans le mémoire
     spots_ronds = np.arange(40, 131, 10)
@@ -230,6 +297,8 @@ def main():
 
     ecrire_csv_et_md(df_validations, os.path.join(REPERTOIRE_FIGURES, "figure1_validations"), float_format="{:.4f}")
     ecrire_csv_et_md(df_b, os.path.join(REPERTOIRE_FIGURES, "figure1_autocall_vega"), float_format="{:.4f}")
+    ecrire_csv_et_md(df_delta_discontinuite, os.path.join(REPERTOIRE_FIGURES, "figure1_delta_discontinuite"), float_format="{:.4f}")
+    ecrire_csv_et_md(df_zero_vega, os.path.join(REPERTOIRE_FIGURES, "figure1_spot_zero_vega"), float_format="{:.4f}")
 
     tracer_figure(df_a, df_b)
     print(f"Terminé en {time.time() - t0:.1f}s")
