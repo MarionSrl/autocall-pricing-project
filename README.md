@@ -211,26 +211,36 @@ juste au-dessus) que le panneau doit démontrer. Sur tout le domaine spot > barr
 2000 points de la grille) — conforme à l'attendu.
 
 **Panneau (b)** reprend le produit de référence (10 ans, section 1) avec son coupon
-résolu au pair pour un spot de 100 (**11.81 %**, cohérent avec le 11.83 % trouvé pour le
-cas A de la Figure 2 — écart dû aux seeds/résolutions indépendantes des deux scripts),
-et trace son vega total par Monte Carlo (bump ±1pt de vol, differencing commun),
+résolu au pair pour un spot de 100. Ce coupon est calculé **exactement** comme dans la
+Figure 2 (même fonction `simuler_indices`, même seed, même grille quotidienne, indice A
+extrait de la même façon) plutôt que par une simulation indépendante à pas annuel : la
+spec impose une seule seed globale, donc une même quantité (le coupon au pair de
+l'indice classique à spot=100) doit ressortir au même chiffre partout dans le mémoire —
+**11.83 %** dans les deux figures (voir `resoudre_coupon_reference` dans le script :
+une simulation séparée à seed identique mais à un nombre de pas différent tire une
+suite de gaussiennes différente et ne reproduit donc pas les mêmes trajectoires, d'où
+l'écart de 2 points de base observé avant cette correction).
+
+Le vega total est tracé par Monte Carlo (bump ±1pt de vol, differencing commun),
 décomposé en jambe « autocall sans PDI » et jambe « PDI » (`decomposer_legs_pdi`).
 Contrairement au PDI isolé, **le vega total change de signe** : positif pour un spot
-faible (jambe sans-PDI dominante), il devient négatif à partir d'un spot d'environ 71
-(la jambe PDI, dont le poids relatif augmente avec le spot à mesure que la probabilité
-de rappel précoce — donc de sortie du produit avant que le PDI ne compte — diminue,
-finit par dominer en signe opposé). C'est le résultat que la spec demandait de
-démontrer : le vega du PDI seul est de signe constant, celui de l'autocall complet ne
-l'est pas, parce que ses deux jambes ont des expositions vega opposées.
+faible (jambe sans-PDI dominante), il devient négatif au-delà d'un spot d'environ
+**71,05** (`trouver_spot_zero_vega`, dichotomie de Brent à seed MC fixe — à lire comme
+une estimation ponctuelle : l'erreur standard du vega au voisinage du zéro est d'environ
+1,6 point, ce qui, compte tenu de la pente locale, revient à une incertitude d'environ
+±0,4 sur ce spot). La jambe PDI, dont le poids relatif augmente avec le spot à mesure
+que la probabilité de rappel précoce diminue, finit par dominer en signe opposé. C'est
+le résultat que la spec demandait de démontrer : le vega du PDI seul est de signe
+constant, celui de l'autocall complet ne l'est pas, parce que ses deux jambes ont des
+expositions vega opposées.
 
 **Validations obligatoires** (voir `tests/test_barrier_options.py`) : KI + KO = vanille
 sur la formule fermée (écart nul à la précision machine) ; convergence de la formule
-fermée vers un prix Monte Carlo indépendant (probabilité de franchissement par pont
-brownien entre pas de simulation, cf. docstring de `mc_put_down_and_in` — un test
-« trajectoire quotidienne a touché la barrière » naïf sous-estime largement la
-probabilité de franchissement continu et fait échouer la tolérance de 0.5 % ; voir aussi
-la note sur Broadie–Glasserman–Kou ci-dessous), écart obtenu : **0.25 %** à 200 000
-trajectoires (spot=70).
+fermée vers un prix Monte Carlo indépendant, écart obtenu **0,25 %** à 200 000
+trajectoires (spot=70). Cette convergence MC porte sur le put down-and-in **à barrière
+continue** du panneau (a) — un objet différent du PDI du produit autocall (barrière
+observée à maturité uniquement, cf. section suivante) — et sa méthode est détaillée
+juste en dessous.
 
 ### Convention du coupon — à lire avant d'interpréter les résultats
 
@@ -299,18 +309,28 @@ quantifier l'effet du décrément indépendamment de la barrière.
 ### Hypothèses de modélisation et leurs limites
 
 - **Barrières observées discrètement** (annuellement pour le rappel, à maturité pour le
-  PDI), conformément au produit décrit. Le pricer Monte Carlo du produit (Figures 2 et
-  panneau b de la Figure 1) observe donc les barrières aux dates de la grille de
-  simulation et non en continu ; le PDI du produit, en particulier, est explicitement à
-  maturité uniquement, donc sans ambiguïté de monitoring — aucun ajustement de type
-  Broadie–Glasserman–Kou n'y est nécessaire. Le panneau (a) de la Figure 1 est distinct :
-  c'est une illustration autonome d'un **vrai** put down-and-in à barrière **continue**
-  (formule fermée de la théorie des options à barrière), qui ne correspond pas à la
-  convention à maturité uniquement du produit — voir la section dédiée ci-dessus. Sa
-  validation Monte Carlo interne (`mc_put_down_and_in`) applique une correction de
-  continuité (probabilité de franchissement par pont brownien entre pas de simulation),
-  conceptuellement proche de l'ajustement Broadie–Glasserman–Kou, pour comparer
-  équitablement un chemin simulé discrètement à la formule fermée à barrière continue.
+  PDI), conformément au produit décrit. **Deux conventions de barrière distinctes
+  coexistent dans le repo, à ne pas confondre :**
+
+  1. **Le PDI du produit autocall** (Figures 2 et panneau b de la Figure 1) est
+     observé **à maturité uniquement** (cf. section 1 de la spec / section dédiée
+     ci-dessus) : ce n'est pas un monitoring discret d'une barrière continue, c'est une
+     condition terminale, sans aucune ambiguïté de fréquence d'observation. Aucun
+     ajustement de type Broadie–Glasserman–Kou ne s'applique à ce PDI, et il n'y en a
+     pas dans le pricer MC du produit (`src/pricer_autocall.py`).
+  2. **Le PDI générique du panneau (a) de la Figure 1** est un objet différent : une
+     illustration autonome, indépendante du produit, d'un **vrai** put down-and-in à
+     barrière **continûment observée** (la formule fermée de Bouzoubaa & Osseiran /
+     Hull suppose un franchissement à tout instant, pas seulement aux dates
+     d'observation du produit). Pour valider cette formule fermée par un Monte Carlo
+     indépendant (`src/barrier_options.py::mc_put_down_and_in`), il faut donc que le MC
+     lui-même approxime une barrière continue malgré une simulation à pas discret : on
+     y applique une **correction de continuité par pont brownien** (probabilité exacte
+     de franchissement de la barrière *entre* deux pas de simulation consécutifs,
+     sachant les valeurs simulées à ces deux pas — cf. docstring de la fonction),
+     conceptuellement proche de l'ajustement Broadie–Glasserman–Kou. **Cette correction
+     ne concerne que cette validation MC du panneau (a) ; elle n'intervient nulle part
+     dans le pricing du produit autocall lui-même.**
 - **Volatilité constante et absence de skew** : tous les sous-jacents (A, B, C) sont
   modélisés sous Black-Scholes avec une volatilité unique et constante (18 %). En
   pratique, un smile/skew de volatilité affecterait différemment les zones proches des
