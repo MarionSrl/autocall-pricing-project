@@ -170,6 +170,111 @@ pip install -r requirements.txt
 
 ---
 
+## Figures quantitatives du mémoire (`src/`, `scripts/`, `tests/`, `figures/`)
+
+En complément du notebook d'exploration ci-dessus, le repo contient un module Python
+autonome qui reproduit les figures quantitatives insérées dans le mémoire (produit
+autocall 10 ans, sous-jacents à décrément, indice Volatility Target), avec leurs tests
+et leurs sorties chiffrées réutilisables directement dans le texte.
+
+- `src/` : `marche.py` (paramètres marché), `simulation.py` (GBM générique, variables
+  antithétiques), `indices.py` (indices A/B/C construits sur les mêmes chocs gaussiens,
+  cas de contrôle B′, barrière dégressive), `pricer_autocall.py` (pricer MC de
+  l'autocall), `coupon_solver.py` (coupon au pair par dichotomie de Brent),
+  `style_graphique.py` / `reporting.py` (rendu).
+- `scripts/` : un script par figure, qui écrit son PNG (300 dpi, `figures/`) et ses
+  résultats numériques (`figures/*.csv` et `.md`).
+- `tests/` : pytest (convergence, parités, cas limites — voir plus bas).
+- Le notebook `notebooks/Pricer_Autocall_MC.ipynb` reste indépendant de `src/` et
+  continue de fonctionner tel quel (taux de Vasicek, delta hedging, etc., hors périmètre
+  des figures du mémoire).
+
+Pour reproduire une figure : `pip install -r requirements.txt` puis, par exemple,
+`python scripts/fig2_autocall_vs_decrement.py`.
+
+### Convention du coupon — à lire avant d'interpréter les résultats
+
+Le produit est un autocall « à mémoire » au sens suivant : à la date de rappel `t_obs`,
+le porteur reçoit `1 + coupon × t_obs`, c'est-à-dire l'ensemble des coupons annuels
+cumulés depuis l'origine (effet mémoire). **Si le produit atteint la maturité sans
+jamais avoir été rappelé, aucun coupon n'est versé** — seul le capital est remboursé
+(intégralement si le PDI n'est pas activé, sinon proportionnellement au sous-jacent).
+Cette convention correspond à un autocall à barrière unique (le même niveau déclenche
+à la fois le rappel et l'accumulation du coupon), sans barrière de coupon indépendante.
+
+Cette convention n'est pas neutre pour la comparaison des sous-jacents de la Figure 2 :
+les indices à décrément retardent mécaniquement le rappel (la barrière de 100 % est plus
+difficile à atteindre), ce qui **augmente la probabilité d'aller à maturité sans jamais
+toucher de coupon**. Une partie de la hausse du coupon facial affichée par les indices à
+décrément compense donc explicitement ce risque de ne rien percevoir, et pas seulement
+le risque de perte en capital — c'est un point de lecture essentiel pour l'interprétation
+de la Figure 2, distinct de la seule probabilité d'activation du PDI.
+
+### Le coupon de 26,45 % du cas C n'est pas un niveau de marché
+
+Le coupon au pair obtenu pour l'indice à décrément en points (cas C, D implicite très
+supérieur à 5 % en fin de période) est de **26,45 %** — un niveau qui ne se rencontre pas
+en pratique sur ce type de produit. Ce n'est pas une anomalie du pricer : c'est la
+conséquence directe et attendue de la combinaison **décrément de 5 % + barrière de
+rappel constante à 100 %** sur 10 ans. Avec cette combinaison, le rappel devient de plus
+en plus improbable au fil des années (l'indice décroche mécaniquement de la barrière), le
+produit va très souvent jusqu'à maturité — et, du fait de la convention « à mémoire sans
+barrière de coupon indépendante » ci-dessus, ne verse alors aucun coupon. Le coupon
+facial doit donc devenir extrême pour compenser, sur les scénarios où le rappel a
+effectivement lieu, la probabilité élevée de n'en toucher aucun. **Ce chiffre est un
+résultat de démonstration, pas une proposition de structuration réaliste.**
+
+Deux cas supplémentaires isolent chacun un aspect de cette lecture :
+
+- **B′ — décrément en % avec D = q = 3 %** (cas de contrôle). En fixant le décrément
+  exactement au niveau du dividende réel de l'indice A, B′ est — trajectoire par
+  trajectoire, pas seulement en espérance — **identique à A** (voir
+  `src/indices.py::indice_decrement_pourcentage` et le test associé). Le coupon au pair
+  obtenu est rigoureusement le même que celui d'A (11,83 %). Cela isole l'effet du
+  *mécanisme* de décrément de l'effet « le décrément excède le dividende réel » : tout
+  l'écart entre B (17,92 %) et A vient des 2 points de décrément en trop (5 % contre 3 %
+  de dividende réel), pas du mécanisme en tant que tel.
+- **C′ — décrément en points + barrière dégressive** (−5 %/an, plancher 70 %), qui
+  correspond à la configuration réellement commercialisée en retail : le décrément seul
+  (cas C) rend le rappel trop improbable pour être vendable, la barrière dégressive le
+  compense en facilitant le rappel anticipé. Le coupon au pair retombe à **15,2 %**, à la
+  limite haute d'une fourchette de marché plausible (8–15 %), contre 26,45 % pour C seul.
+  La probabilité d'activation du PDI redescend également, de 31,8 % (C) à 20,0 % (C′),
+  mais reste supérieure à celle d'A (16,8 %) : la barrière dégressive atténue l'effet du
+  décrément sur le risque de perte en capital, elle ne l'annule pas. Fait notable, la
+  perte moyenne *conditionnelle* sachant activation du PDI est en revanche légèrement
+  plus élevée pour C′ (79,3 %) que pour C (73,9 %) : en rappelant plus tôt les scénarios
+  favorables, la barrière dégressive concentre les trajectoires survivant jusqu'à
+  maturité sur les scénarios les plus dégradés.
+
+### Hypothèses de modélisation et leurs limites
+
+- **Barrières observées discrètement** (annuellement pour le rappel, à maturité pour le
+  PDI), conformément au produit décrit. Le pricer Monte Carlo observe donc les barrières
+  aux dates de la grille de simulation et non en continu ; aucun ajustement de type
+  Broadie–Glasserman–Kou (correction du niveau de barrière pour un monitoring discret)
+  n'est appliqué à ce stade — il n'est pertinent que pour une barrière **continue** que
+  le mémoire n'évalue pas ici (le PDI, en particulier, est explicitement à maturité
+  uniquement, donc sans ambiguïté de monitoring).
+- **Volatilité constante et absence de skew** : tous les sous-jacents (A, B, C) sont
+  modélisés sous Black-Scholes avec une volatilité unique et constante (18 %). En
+  pratique, un smile/skew de volatilité affecterait différemment les zones proches des
+  barrières (rappel comme PDI) ; son absence est une simplification qui **sous-estime
+  probablement** l'ampleur des sensibilités mises en évidence dans les Figures 1 et 3.
+- **Pas de coûts de transaction ni de frais de gestion** : ni sur la réplication du
+  décrément (indices B et C), ni sur un éventuel rebalancement dynamique (Figure 3,
+  indice Volatility Target). Les mécanismes étudiés sont donc présentés dans leur version
+  la plus favorable ; en pratique les coûts réduiraient les niveaux de coupon atteignables
+  et amplifieraient la sous-performance des indices Volatility Target au rebalancement.
+- **Corrélation parfaite entre A, B, C** : les trois sous-jacents comparés partagent les
+  mêmes trajectoires browniennes (même graine, mêmes chocs gaussiens), afin d'isoler
+  strictement l'effet du mécanisme de décrément (« toutes choses égales par ailleurs »).
+  Ce n'est pas une hypothèse de marché (des indices décrément réels n'évoluent pas de
+  façon parfaitement corrélée à leur indice de référence) mais un choix méthodologique
+  de comparaison contrôlée.
+- **Convention du coupon à mémoire sans barrière de coupon indépendante** : voir le
+  paragraphe dédié ci-dessus.
+
 ## Extensions possibles
 
 - Modèle de volatilité stochastique (Heston)  
