@@ -247,6 +247,15 @@ Deux cas supplémentaires isolent chacun un aspect de cette lecture :
   favorables, la barrière dégressive concentre les trajectoires survivant jusqu'à
   maturité sur les scénarios les plus dégradés.
 
+**C′ vs A + barrière dégressive : isoler l'effet du décrément seul.** Ces deux cas
+partagent exactement la même barrière de rappel dégressive (−5 %/an, plancher 70 %) ;
+seul le sous-jacent diffère (indice à décrément en points pour C′, indice classique pour
+A + barrière dégressive). À structure de rappel strictement identique, l'écart de coupon
+au pair entre les deux — **15,2 % contre 6,7 %, soit environ 8,5 points** — est donc
+attribuable au seul mécanisme de décrément en points, sans effet confondu par un
+changement de barrière. C'est la comparaison la plus propre du jeu de résultats pour
+quantifier l'effet du décrément indépendamment de la barrière.
+
 ### Hypothèses de modélisation et leurs limites
 
 - **Barrières observées discrètement** (annuellement pour le rappel, à maturité pour le

@@ -22,7 +22,7 @@ LIBELLES = {
     "C": "C — Décrément points (K=5)",
     "A_degressive": "A — Barrière dégressive",
     "B_prime": "B′ — Décrément % (D=q=3 %, contrôle)",
-    "C_prime": "C — Décrément points + barrière dégressive",
+    "C_prime": "C′ — Décrément points + barrière dégressive",
 }
 
 LIBELLES_COURTS = {
