@@ -63,7 +63,7 @@ def test_barriere_degressive_decroissante_et_plafonnee():
 
 
 def test_decrement_pourcentage_egal_dividende_redonne_indice_classique():
-    # Cas de contrôle B' de la Figure 2 : quand D = q, l'indice à décrément en %
+    # Cas de contrôle B' de la Figure B : quand D = q, l'indice à décrément en %
     # est identique, trajectoire par trajectoire, à l'indice classique A (même
     # construction : mêmes chocs, même drift effectif r - q). Isole l'effet du
     # mécanisme de décrément de l'effet "D > q".

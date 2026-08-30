@@ -19,7 +19,7 @@ Convention des drifts risque-neutres (à ne pas mélanger — cf. SPEC §2) :
           I_t = I_{t-1} * (U_t / U_{t-1}) - K * d(t-1,t) / 365
           path-dépendant : pas de drift constant fermé. Le prélèvement K
           devient proportionnellement plus lourd quand l'indice baisse
-          (contrairement à B) : c'est le comportement que la Figure 2
+          (contrairement à B) : c'est le comportement que la Figure B
           doit mettre en évidence.
 
 A, U et C sont simulés au pas quotidien (nb_pas_an pas/an) à partir des MÊMES
@@ -95,11 +95,11 @@ def indice_decrement_pourcentage(U_obs, t_obs, D):
     total return U (pas de re-simulation nécessaire : le décrément en % est un
     multiplicateur déterministe appliqué à U).
 
-    Cas particulier notable (cas de contrôle B' de la Figure 2) : si D = q,
+    Cas particulier notable (cas de contrôle B' de la Figure B) : si D = q,
     B_t = U_t * exp(-q*t) est identique, trajectoire par trajectoire, à
     l'indice classique A (même construction : mêmes chocs, drift r-q). Le
     mécanisme de décrément en % est donc, en lui-même, neutre — tout l'écart
-    entre B et A dans la Figure 2 vient du fait que D (5 %) est fixé
+    entre B et A dans la Figure B vient du fait que D (5 %) est fixé
     au-dessus du dividende réel q (3 %), pas du mécanisme en tant que tel.
     """
     return U_obs * np.exp(-D * np.asarray(t_obs))[None, :]
