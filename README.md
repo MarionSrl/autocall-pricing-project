@@ -14,7 +14,7 @@ long terme ?*
 | `src/` | Modules de pricing : simulation, indices A/B/C, pricer autocall, PDI, coupon, Volatility Target, delta hedging |
 | `scripts/` | Un script par figure du mémoire, plus `run_all.py` pour tout régénérer |
 | `figures/` | PNG (300 dpi) et CSV/MD de résultats, un jeu par figure |
-| `tests/` | Tests pytest (31) |
+| `tests/` | Tests pytest (35) |
 | `RESULTATS.md` | Tous les chiffres cités dans le mémoire, regroupés par figure |
 
 ## Installation et reproduction
@@ -23,7 +23,7 @@ long terme ?*
 pip install -r requirements.txt
 
 python scripts/run_all.py   # régénère les 4 figures + RESULTATS.md (~5 min)
-pytest tests/                # lance les 31 tests
+pytest tests/                # lance les 35 tests
 ```
 
 Chaque figure peut aussi être relancée seule, par exemple :

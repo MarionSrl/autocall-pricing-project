@@ -7,6 +7,7 @@ from src.barrier_options import (
     put_down_and_in,
     put_down_and_out,
     mc_put_down_and_in,
+    pdi_grecques,
 )
 
 S0, K, H = 100.0, 100.0, 60.0
@@ -65,3 +66,60 @@ def test_convergence_mc_vers_formule_fermee():
     # cohérence supplémentaire : l'écart doit rester dans un ordre de grandeur
     # raisonnable par rapport au bruit MC (quelques erreurs standard)
     assert abs(prix_mc - prix_ferme) < 8 * erreur_std
+
+
+# Échelle du vega/vanna (cf. PR #13 : facteur 100 manquant, non couvert par un
+# test avant cette correction -- pdi_grecques rapporte vega/vanna "pour 1
+# point de vol", pas la dérivée brute dP/dsigma). Les deux tests suivants
+# re-pricent indépendamment via put_down_and_in avec un bump symétrique de
+# +/-0.5 point (span total = 1 point, centré sur SIGMA), sans passer par le
+# code de pdi_grecques -- c'est ce contrôle qui aurait immédiatement détecté
+# le bug (vega_formule aurait été ~100x plus grand que la variation de prix
+# réellement observée pour un déplacement de 1 point de vol). Un bump à un
+# seul côté (sigma -> sigma+0.01) ne convient pas ici : la convexité du PDI
+# en sigma (vomma) le fait diverger de plusieurs % de la pente locale, ce qui
+# n'a rien à voir avec le bug corrigé.
+SPOTS_VEGA_TEST = np.array([65.0, 75.0, 90.0, 100.0, 110.0])
+
+
+def test_vega_pdi_coherent_avec_repricing_a_plus_1pt_de_vol():
+    vega_formule = pdi_grecques(SPOTS_VEGA_TEST, K, H, R, Q, SIGMA, T)["vega"]
+    prix_up = put_down_and_in(SPOTS_VEGA_TEST, K, H, R, Q, SIGMA + 0.005, T)
+    prix_down = put_down_and_in(SPOTS_VEGA_TEST, K, H, R, Q, SIGMA - 0.005, T)
+    vega_repriced = prix_up - prix_down
+    np.testing.assert_allclose(vega_formule, vega_repriced, rtol=0.01)
+
+
+def test_vanna_pdi_coherent_avec_repricing_a_plus_1pt_de_vol():
+    vanna_formule = pdi_grecques(SPOTS_VEGA_TEST, K, H, R, Q, SIGMA, T)["vanna"]
+    hS = SPOTS_VEGA_TEST * 1e-3  # même h_spot_rel que le défaut de pdi_grecques
+    delta_a_vol_haut = (
+        put_down_and_in(SPOTS_VEGA_TEST + hS, K, H, R, Q, SIGMA + 0.005, T)
+        - put_down_and_in(SPOTS_VEGA_TEST - hS, K, H, R, Q, SIGMA + 0.005, T)
+    ) / (2 * hS)
+    delta_a_vol_bas = (
+        put_down_and_in(SPOTS_VEGA_TEST + hS, K, H, R, Q, SIGMA - 0.005, T)
+        - put_down_and_in(SPOTS_VEGA_TEST - hS, K, H, R, Q, SIGMA - 0.005, T)
+    ) / (2 * hS)
+    vanna_repriced = delta_a_vol_haut - delta_a_vol_bas
+    np.testing.assert_allclose(vanna_formule, vanna_repriced, rtol=0.01)
+
+
+def test_vega_pdi_ordre_de_grandeur_inferieur_au_prix():
+    # Un point de vol ne peut pas déplacer le prix du PDI plus que le prix
+    # lui-même -- c'est justement l'incohérence qui a mis la puce à l'oreille
+    # sur le bug de la PR #13 (un PDI à 1.23 affichait un vega de 39.15).
+    # Restreint à spot<=125 : au-delà, le prix devient microscopique
+    # (<0.003, put profondément OTM) et le ratio vega/prix cesse d'être
+    # informatif (queue de distribution, pas un signe de bug).
+    spots = np.linspace(40.0, 125.0, 341)
+    grecques = pdi_grecques(spots, K, H, R, Q, SIGMA, T)
+    assert np.all(np.abs(grecques["vega"]) < grecques["prix"])
+
+
+def test_vanna_pdi_ordre_de_grandeur_inferieur_au_delta():
+    # Même contrôle d'ordre de grandeur, appliqué à vanna = d(delta)/d(1pt de
+    # vol) : borné par le delta lui-même sur le même domaine restreint.
+    spots = np.linspace(40.0, 125.0, 341)
+    grecques = pdi_grecques(spots, K, H, R, Q, SIGMA, T)
+    assert np.all(np.abs(grecques["vanna"]) < np.abs(grecques["delta"]))
