@@ -33,6 +33,24 @@ souvent citée de façon informelle pour un *acheteur* d'option). Vérifié
 empiriquement dans scripts/figD_hedging_produit_notebook.py : avec cette
 convention, la prédiction théorique reproduit bien le signe et l'ordre de
 grandeur du P&L simulé pour les 4 niveaux de volatilité réalisée testés.
+
+Point de vue et signe de gamma_$ (à ne pas confondre) : gamma_$ = S0*f''(S)
+est le gamma de f(S), la valeur actualisée du flux versé A L'INVESTISSEUR --
+exactement la même fonction, et la même convention (aucun changement de
+perspective), que celle utilisée pour le vega de l'autocall en Figure A. Ce
+n'est PAS le gamma "de position" de l'émetteur. Sur le produit de la Figure D,
+gamma_$ est négatif (f est concave près du spot initial : l'investisseur est
+structurellement "court" l'optionalité de barrière -- le put down-and-in --
+cédée à l'émetteur en échange du coupon), tout comme le vega de l'autocall en
+Figure A est négatif au spot initial du produit de référence (-68.40 pt de %,
+cf. figures/figureA_autocall_vega.csv) : même sous-jacent économique, même
+signe, deux figures cohérentes. Avec gamma_$ négatif, la formule ci-dessus
+prédit -- et la simulation confirme -- un P&L de couverture CROISSANT avec la
+volatilité réalisée : à l'inverse de l'intuition usuelle "vendeur d'option =
+short gamma" (vraie pour une option vanille, toujours convexe), l'émetteur de
+ce produit se retrouve net LONG gamma sur son livre couvert une fois delta-
+hedgé, parce que la fonction qu'il vend (et doit répliquer) est concave, pas
+convexe.
 """
 
 import numpy as np

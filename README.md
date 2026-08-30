@@ -94,6 +94,23 @@ dans **[`RESULTATS.md`](RESULTATS.md)**.
   Figures A-C (ils portent sur un produit à 5 ans, coupon 7 % fixe), mais la
   *relation* PnL-vs-mismatch et PnL-vs-fréquence qu'elle illustre se généraliserait
   qualitativement au produit à 10 ans.
+- **Convention de signe du gamma en Figure D (émetteur, pas investisseur)** : le PnL
+  simulé est celui de l'ÉMETTEUR, qui vend le produit et se couvre en delta au prix
+  modèle — pas celui de l'investisseur (voir `src/delta_hedging.py` pour le détail).
+  `gamma_moyen_dollar` et `gamma_s2_moyen` (dans `figures/figureD_resume.csv`) sont le
+  gamma de f(S,σ), la valeur actualisée du flux versé À L'INVESTISSEUR — exactement la
+  même fonction et la même convention que le vega de l'autocall en Figure A, aucun
+  changement de perspective entre les deux figures. Ce gamma est négatif ici (f est
+  concave près du spot initial : l'investisseur est structurellement « court »
+  l'optionalité de barrière — le put down-and-in — cédée à l'émetteur en échange du
+  coupon), cohérent avec le vega négatif de l'autocall en Figure A (-68,40 pt de % au
+  spot initial du produit de référence, `figureA_autocall_vega.csv`) : même sous-jacent
+  économique, même signe. Avec un gamma négatif, la formule `dPnL_émetteur ≈
+  ½Γ_f·S²·(σ_modèle² − σ_réalisée²)·dt` prédit — et la simulation confirme — un PnL de
+  couverture **croissant** avec la volatilité réalisée : à l'inverse de l'intuition
+  usuelle « vendeur d'option = short gamma » (vraie pour une option vanille, toujours
+  convexe), l'émetteur de ce produit se retrouve net **long gamma** sur son livre
+  couvert une fois delta-hedgé, car la fonction qu'il vend est concave, pas convexe.
 
 Le détail complet de ces hypothèses et de leurs limites est rédigé en texte continu
 ci-dessous, pour être repris tel quel en annexe méthodologique du mémoire.

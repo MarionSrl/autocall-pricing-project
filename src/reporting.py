@@ -18,9 +18,15 @@ def dataframe_vers_markdown(df, float_format="{:.2f}"):
     return "\n".join(lignes)
 
 
-def ecrire_csv_et_md(df, chemin_base, float_format="{:.4f}"):
-    """Écrit df en <chemin_base>.csv et <chemin_base>.md."""
+def ecrire_csv_et_md(df, chemin_base, float_format="{:.4f}", note=None):
+    """Écrit df en <chemin_base>.csv et <chemin_base>.md.
+
+    `note` : légende optionnelle (une ou plusieurs phrases) ajoutée après le
+    tableau dans le .md uniquement -- le .csv reste des données pures, sans
+    ligne de commentaire, pour rester lisible tel quel par `pd.read_csv`."""
     df.to_csv(f"{chemin_base}.csv", index=False, float_format="%.6f")
     with open(f"{chemin_base}.md", "w") as f:
         f.write(dataframe_vers_markdown(df, float_format=float_format))
         f.write("\n")
+        if note:
+            f.write(f"\n{note}\n")
