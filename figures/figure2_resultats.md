@@ -1,0 +1,6 @@
+| cas | coupon_pair_pct | prix_verif_pct | erreur_std_mc_pct | proba_maturite_pct | proba_pdi_actif_pct | perte_moyenne_cond_pct | proba_rappel_t1_pct | proba_rappel_t2_pct | proba_rappel_t3_pct | proba_rappel_t4_pct | proba_rappel_t5_pct | proba_rappel_t6_pct | proba_rappel_t7_pct | proba_rappel_t8_pct | proba_rappel_t9_pct | proba_rappel_t10_pct |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| A — Indice classique | 11.833 | 100.000 | 0.078 | 25.410 | 16.755 | 58.570 | 45.221 | 11.485 | 5.681 | 3.580 | 2.469 | 1.850 | 1.431 | 1.106 | 0.964 | 0.803 |
+| B — Décrément % (5 %/an) | 17.923 | 100.000 | 0.104 | 33.492 | 24.785 | 60.936 | 40.964 | 10.272 | 5.021 | 3.084 | 2.115 | 1.572 | 1.204 | 0.951 | 0.740 | 0.584 |
+| C — Décrément points (K=5) | 26.447 | 100.000 | 0.139 | 36.581 | 31.776 | 73.945 | 40.945 | 9.872 | 4.619 | 2.695 | 1.719 | 1.240 | 0.881 | 0.636 | 0.468 | 0.343 |
+| A — Barrière dégressive | 6.679 | 100.000 | 0.052 | 9.923 | 9.131 | 61.595 | 56.683 | 13.821 | 6.896 | 4.332 | 3.087 | 2.336 | 1.089 | 0.818 | 0.544 | 0.472 |
