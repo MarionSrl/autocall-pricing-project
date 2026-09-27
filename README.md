@@ -38,32 +38,32 @@ Autocall 10 ans, observations annuelles, barrière de rappel à 100 % du niveau 
 coupon **à mémoire** (cumulé depuis l'origine, versé uniquement à la date de rappel —
 si le produit n'est jamais rappelé, aucun coupon n'est versé à maturité), protection du
 capital (PDI) à 60 %, **observée à maturité uniquement**. C'est le produit des Figures
-A, B et C. La **Figure D fait exception** : voir sa description ci-dessous.
+A, B et D. La **Figure C fait exception** : voir sa description ci-dessous.
 
 ## Les 4 figures
-
-**Figure B — Autocall classique vs décrément** (`figB_autocall_vs_decrement.py`).
-Compare le coupon au pair, les probabilités de rappel et d'activation du PDI, et la
-perte conditionnelle, sur 6 cas : indice classique, décrément en %, décrément en
-points, barrière dégressive, et deux cas de contrôle (B′, C′).
 
 **Figure A — Sensibilités du PDI et de l'autocall** (`figA_sensibilites_pdi_autocall.py`).
 Formule fermée d'un put down-and-in (prix, delta, vega, vanna), puis vega Monte Carlo
 de l'autocall complet, décomposé en jambe « sans PDI » et jambe « PDI ». Montre que le
 vega du PDI seul est de signe constant, contrairement à celui de l'autocall complet.
 
-**Figure C — Indice Volatility Target** (`figC_volatility_target.py`). Indice construit
-sur un modèle de volatilité à 2 régimes : trajectoire type, distribution de la vol
-réalisée face à la cible, et scénario de crash-rebond scripté.
+**Figure B — Autocall classique vs décrément** (`figB_autocall_vs_decrement.py`).
+Compare le coupon au pair, les probabilités de rappel et d'activation du PDI, et la
+perte conditionnelle, sur 6 cas : indice classique, décrément en %, décrément en
+points, barrière dégressive, et deux cas de contrôle (B′, C′).
 
-**Figure D — Delta hedging et risques résiduels de couverture**
-(`figD_hedging_produit_notebook.py`). Panneau (a) : PnL de couverture en fonction du
+**Figure C — Delta hedging et risques résiduels de couverture**
+(`figC_hedging_produit_notebook.py`). Panneau (a) : PnL de couverture en fonction du
 mismatch entre volatilité réalisée et volatilité modèle, avec prédiction théorique de
 gamma-trading superposée. Panneau (b) : dispersion du PnL selon la fréquence de
 rebalancement (quasi plate — le risque vient des discontinuités de payoff aux
 barrières, pas de la granularité du rebalancement). **Porte sur le produit du notebook
 d'exploration (5 ans, coupon fixe 7 %, vol modèle 20 %, sans dividende), pas sur le
-produit de référence des Figures A-C** — voir « Conventions à connaître » ci-dessous.
+produit de référence des Figures A, B et D** — voir « Conventions à connaître » ci-dessous.
+
+**Figure D — Indice Volatility Target** (`figD_volatility_target.py`). Indice construit
+sur un modèle de volatilité à 2 régimes : trajectoire type, distribution de la vol
+réalisée face à la cible, et scénario de crash-rebond scripté.
 
 Tous les chiffres (coupons, sensibilités, sous-participation, gamma moyen...) sont
 dans **[`RESULTATS.md`](RESULTATS.md)**.
@@ -80,24 +80,24 @@ dans **[`RESULTATS.md`](RESULTATS.md)**.
   down-and-in à barrière continûment observée (formule fermée classique), dont la
   validation Monte Carlo utilise une correction de continuité par pont brownien.
 - **Pas de coûts de transaction** (réplication du décrément, rebalancement quotidien
-  de l'indice Volatility Target ou du hedge de la Figure D) : les mécanismes sont
+  de l'indice Volatility Target ou du hedge de la Figure C) : les mécanismes sont
   présentés dans leur configuration la plus favorable.
-- **La Figure D porte sur un produit différent des Figures A-C** : maturité 5 ans (pas
-  10), coupon fixe à 7 % (pas résolu au pair), volatilité modèle 20 % (pas 18 %), pas
-  de dividende. C'est le produit du notebook d'exploration original, réutilisé tel quel
-  plutôt que porté sur le produit à 10 ans. Ce choix ne remet pas en cause la
-  conclusion de la Figure D : le mécanisme démontré — risque résiduel de gap aux
+- **La Figure C porte sur un produit différent des Figures A, B et D** : maturité 5 ans
+  (pas 10), coupon fixe à 7 % (pas résolu au pair), volatilité modèle 20 % (pas 18 %),
+  pas de dividende. C'est le produit du notebook d'exploration original, réutilisé tel
+  quel plutôt que porté sur le produit à 10 ans. Ce choix ne remet pas en cause la
+  conclusion de la Figure C : le mécanisme démontré — risque résiduel de gap aux
   barrières de rappel/capital, sensibilité du PnL de couverture au mismatch entre
   volatilité réalisée et volatilité modèle — est **structurel** à tout autocall à
   barrières discontinues, il ne dépend ni de la maturité ni du niveau du coupon. Les
   *niveaux* de PnL affichés ne sont donc pas directement comparables aux coupons des
-  Figures A-C (ils portent sur un produit à 5 ans, coupon 7 % fixe), mais la
+  Figures A, B et D (ils portent sur un produit à 5 ans, coupon 7 % fixe), mais la
   *relation* PnL-vs-mismatch et PnL-vs-fréquence qu'elle illustre se généraliserait
   qualitativement au produit à 10 ans.
-- **Convention de signe du gamma en Figure D (émetteur, pas investisseur)** : le PnL
+- **Convention de signe du gamma en Figure C (émetteur, pas investisseur)** : le PnL
   simulé est celui de l'ÉMETTEUR, qui vend le produit et se couvre en delta au prix
   modèle — pas celui de l'investisseur (voir `src/delta_hedging.py` pour le détail).
-  `gamma_moyen_dollar` et `gamma_s2_moyen` (dans `figures/figureD_resume.csv`) sont le
+  `gamma_moyen_dollar` et `gamma_s2_moyen` (dans `figures/figureC_resume.csv`) sont le
   gamma de f(S,σ), la valeur actualisée du flux versé À L'INVESTISSEUR — exactement la
   même fonction et la même convention que le vega de l'autocall en Figure A, aucun
   changement de perspective entre les deux figures. Ce gamma est négatif ici (f est
@@ -162,13 +162,13 @@ seulement le risque de perte en capital que mesure la probabilité d'activation 
 
 Aucun coût de transaction ni frais de gestion n'est par ailleurs pris en compte, que ce
 soit dans la réplication du décrément des indices B et C ou dans le rebalancement
-quotidien de l'indice à cible de volatilité de la Figure C entre le sous-jacent et le
+quotidien de l'indice à cible de volatilité de la Figure D entre le sous-jacent et le
 cash. Les mécanismes étudiés sont donc présentés dans leur configuration la plus
 favorable ; l'indice Volatility Target, dont l'exposition varie précisément le plus dans
 les phases où le mécanisme est le plus actif, verrait notamment sa performance amputée
 d'autant plus fortement par des coûts de rebalancement réalistes.
 
-Enfin, la volatilité sous-jacente à l'indice Volatility Target de la Figure C est
+Enfin, la volatilité sous-jacente à l'indice Volatility Target de la Figure D est
 modélisée par une chaîne de Markov à deux régimes — volatilité basse et volatilité de
 stress, avec des durées moyennes de séjour distinctes — plutôt que par un modèle à
 volatilité stochastique complet de type Heston. Ce choix se justifie par le fait que
@@ -188,11 +188,11 @@ probablement amplifié par cette construction ; l'effet de sous-participation au
 qui suit, piloté non par le niveau de volatilité pré-choc mais par le retard structurel
 inhérent à toute fenêtre glissante, est en revanche robuste à cette simplification.
 
-Enfin, la Figure D, consacrée à la couverture en delta et à ses risques résiduels,
-porte délibérément sur un produit distinct de celui des Figures A à C : le produit du
-notebook d'exploration original (maturité 5 ans, coupon fixe de 7 % non résolu au pair,
-volatilité modèle 20 %, sans dividende), plutôt que sur le produit de référence à 10 ans
-utilisé partout ailleurs. Ce choix méthodologique est justifié par le fait que le
+Enfin, la Figure C, consacrée à la couverture en delta et à ses risques résiduels,
+porte délibérément sur un produit distinct de celui des Figures A, B et D : le produit
+du notebook d'exploration original (maturité 5 ans, coupon fixe de 7 % non résolu au
+pair, volatilité modèle 20 %, sans dividende), plutôt que sur le produit de référence à
+10 ans utilisé partout ailleurs. Ce choix méthodologique est justifié par le fait que le
 mécanisme mis en évidence — un risque résiduel de gap au franchissement des barrières
 de rappel et de capital, et une sensibilité du P&L de couverture à l'écart entre
 volatilité réalisée et volatilité de modèle — est structurel à tout autocall à
@@ -200,7 +200,7 @@ barrières discrètes et discontinues, indépendamment de sa maturité ou du niv
 coupon ; porter l'analyse sur le produit à 10 ans aurait démontré le même mécanisme,
 au prix d'un effort de développement supplémentaire sans valeur ajoutée pour la
 démonstration. Une conséquence de ce choix est que les niveaux de P&L rapportés dans la
-Figure D ne sont pas directement comparables aux niveaux de coupon des Figures A à C ;
+Figure C ne sont pas directement comparables aux niveaux de coupon des Figures A, B et D ;
 seules la relation qualitative entre P&L et mismatch de volatilité, et la relative
 insensibilité du risque de couverture à la fréquence de rebalancement, sont les
 résultats à retenir et à généraliser.

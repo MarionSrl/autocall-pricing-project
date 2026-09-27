@@ -1,6 +1,6 @@
 # Résultats numériques du mémoire
 
-Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par `scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py`, `figC_volatility_target.py` et `figD_hedging_produit_notebook.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). **Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer si un paramètre ou une seed change.
+Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par `scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py`, `figC_hedging_produit_notebook.py` et `figD_volatility_target.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). **Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer si un paramètre ou une seed change.
 
 ## Figure A — Sensibilités du PDI et de l'autocall
 
@@ -24,26 +24,9 @@ Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV p
 | C′ — Décrément points + barrière dégressive | 15.22 | 0.10 | 71.60 | 79.64 | 19.99 | 79.27 |
 | A — Barrière dégressive | 6.68 | 0.05 | 95.12 | 90.08 | 9.13 | 61.60 |
 
-## Figure C — Indice Volatility Target
+## Figure C — Delta hedging et risques résiduels de couverture
 
-| Grandeur | Valeur |
-|---|---|
-| Vol réalisée moyenne de l'indice VT (cible 15.00 %) | 16.01 % |
-| Vol réalisée médiane de l'indice VT | 16.03 % |
-| Écart-type de la vol réalisée de l'indice VT | 1.31 pt |
-| Proportion de trajectoires dans ±2 pt de la cible | 76.00 % |
-| Temps passé à l'exposition plafond (L_max) sur la trajectoire type | 29.82 % |
-| Sous-participation au rebond, fenêtre 20j | 17.55 pts |
-| Sous-participation au rebond, fenêtre 60j | 18.27 pts |
-| Écart indice nu − indice VT en fin de scénario, fenêtre 20j | 17.83 pts |
-| Écart indice nu − indice VT en fin de scénario, fenêtre 60j | 18.31 pts |
-| Niveau plancher (creux) de l'indice nu dans le scénario V | 70.00 |
-| Niveau plancher (creux) de l'indice VT dans le scénario V, fenêtre 20j | 63.79 |
-| Niveau plancher (creux) de l'indice VT dans le scénario V, fenêtre 60j | 61.17 |
-
-## Figure D — Delta hedging et risques résiduels de couverture
-
-*Porte sur le produit du notebook (5 ans, coupon fixe 7%, vol modèle 20%), distinct du produit de référence des Figures A-C -- voir le README.*
+*Porte sur le produit du notebook (5 ans, coupon fixe 7%, vol modèle 20%), distinct du produit de référence des Figures A, B et D -- voir le README.*
 
 | Grandeur | Valeur |
 |---|---|
@@ -67,3 +50,20 @@ Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV p
 | 5j | 0.84 | 7.50 | 0.17 |
 | 10j | 1.29 | 8.05 | 0.18 |
 | 20j | 1.19 | 8.22 | 0.18 |
+
+## Figure D — Indice Volatility Target
+
+| Grandeur | Valeur |
+|---|---|
+| Vol réalisée moyenne de l'indice VT (cible 15.00 %) | 16.01 % |
+| Vol réalisée médiane de l'indice VT | 16.03 % |
+| Écart-type de la vol réalisée de l'indice VT | 1.31 pt |
+| Proportion de trajectoires dans ±2 pt de la cible | 76.00 % |
+| Temps passé à l'exposition plafond (L_max) sur la trajectoire type | 29.82 % |
+| Sous-participation au rebond, fenêtre 20j | 17.55 pts |
+| Sous-participation au rebond, fenêtre 60j | 18.27 pts |
+| Écart indice nu − indice VT en fin de scénario, fenêtre 20j | 17.83 pts |
+| Écart indice nu − indice VT en fin de scénario, fenêtre 60j | 18.31 pts |
+| Niveau plancher (creux) de l'indice nu dans le scénario V | 70.00 |
+| Niveau plancher (creux) de l'indice VT dans le scénario V, fenêtre 20j | 63.79 |
+| Niveau plancher (creux) de l'indice VT dans le scénario V, fenêtre 60j | 61.17 |
