@@ -82,12 +82,54 @@ def section_figureA():
 
 
 def section_figureC():
-    df_vol = _lire("figureC_distribution_vol_realisee.csv")
-    df_v = _lire("figureC_scenario_v_resume.csv")
-    df_traj = _lire("figureC_trajectoire_type_resume.csv")
+    df_vol = _lire("figureC_pnl_vs_vol_realisee.csv")
+    df_resume = _lire("figureC_resume.csv")
+    df_freq = _lire("figureC_pnl_vs_frequence.csv")
+    resume = df_resume.iloc[0]
 
     lignes = [
-        "## Figure C — Indice Volatility Target",
+        "## Figure C — Delta hedging et risques résiduels de couverture",
+        "",
+        "*Porte sur le produit du notebook (5 ans, coupon fixe 7%, vol modèle 20%), "
+        "distinct du produit de référence des Figures A, B et D -- voir le README.*",
+        "",
+        "| Grandeur | Valeur |",
+        "|---|---|",
+        f"| Gamma moyen du portefeuille (dollar-gamma, scénario de référence) | {resume['gamma_moyen_dollar']:.5f} |",
+        f"| Gamma×spot² moyen réalisé (utilisé pour la courbe théorique) | {resume['gamma_s2_moyen']:.5f} |",
+        f"| Temps de sortie moyen (rappel ou maturité), scénario de référence | {_fmt(resume['temps_sortie_moyen_annees'])} ans |",
+        f"| Prix initial (modèle) | {_fmt(resume['prix_initial_pct'])} % |",
+        f"| Trajectoires de la grille delta/gamma | {int(resume['nb_trajectoires_grille_delta'])} |",
+        f"| Trajectoires de couverture par scénario | {int(resume['nb_trajectoires_couverture_par_scenario'])} |",
+        "",
+        "| Vol réalisée (%) | PnL moyen | Erreur std | PnL théorique (gamma-trading) |",
+        "|---|---|---|---|",
+    ]
+    for _, ligne in df_vol.iterrows():
+        lignes.append(
+            f"| {_fmt(ligne['vol_realisee_pct'])} | {_fmt(ligne['pnl_moyen'])} | {_fmt(ligne['pnl_erreur_std'])} | "
+            f"{_fmt(ligne['pnl_theorique'])} |"
+        )
+    lignes += [
+        "",
+        "| Fréquence de rebalancement | PnL moyen | Écart-type du PnL | Erreur std |",
+        "|---|---|---|---|",
+    ]
+    for _, ligne in df_freq.iterrows():
+        lignes.append(
+            f"| {int(ligne['freq_rebal_jours'])}j | {_fmt(ligne['pnl_moyen'])} | {_fmt(ligne['pnl_ecart_type'])} | "
+            f"{_fmt(ligne['pnl_erreur_std'])} |"
+        )
+    return "\n".join(lignes)
+
+
+def section_figureD():
+    df_vol = _lire("figureD_distribution_vol_realisee.csv")
+    df_v = _lire("figureD_scenario_v_resume.csv")
+    df_traj = _lire("figureD_trajectoire_type_resume.csv")
+
+    lignes = [
+        "## Figure D — Indice Volatility Target",
         "",
         "| Grandeur | Valeur |",
         "|---|---|",
@@ -123,54 +165,12 @@ def section_figureC():
     return "\n".join(lignes)
 
 
-def section_figureD():
-    df_vol = _lire("figureD_pnl_vs_vol_realisee.csv")
-    df_resume = _lire("figureD_resume.csv")
-    df_freq = _lire("figureD_pnl_vs_frequence.csv")
-    resume = df_resume.iloc[0]
-
-    lignes = [
-        "## Figure D — Delta hedging et risques résiduels de couverture",
-        "",
-        "*Porte sur le produit du notebook (5 ans, coupon fixe 7%, vol modèle 20%), "
-        "distinct du produit de référence des Figures A-C -- voir le README.*",
-        "",
-        "| Grandeur | Valeur |",
-        "|---|---|",
-        f"| Gamma moyen du portefeuille (dollar-gamma, scénario de référence) | {resume['gamma_moyen_dollar']:.5f} |",
-        f"| Gamma×spot² moyen réalisé (utilisé pour la courbe théorique) | {resume['gamma_s2_moyen']:.5f} |",
-        f"| Temps de sortie moyen (rappel ou maturité), scénario de référence | {_fmt(resume['temps_sortie_moyen_annees'])} ans |",
-        f"| Prix initial (modèle) | {_fmt(resume['prix_initial_pct'])} % |",
-        f"| Trajectoires de la grille delta/gamma | {int(resume['nb_trajectoires_grille_delta'])} |",
-        f"| Trajectoires de couverture par scénario | {int(resume['nb_trajectoires_couverture_par_scenario'])} |",
-        "",
-        "| Vol réalisée (%) | PnL moyen | Erreur std | PnL théorique (gamma-trading) |",
-        "|---|---|---|---|",
-    ]
-    for _, ligne in df_vol.iterrows():
-        lignes.append(
-            f"| {_fmt(ligne['vol_realisee_pct'])} | {_fmt(ligne['pnl_moyen'])} | {_fmt(ligne['pnl_erreur_std'])} | "
-            f"{_fmt(ligne['pnl_theorique'])} |"
-        )
-    lignes += [
-        "",
-        "| Fréquence de rebalancement | PnL moyen | Écart-type du PnL | Erreur std |",
-        "|---|---|---|---|",
-    ]
-    for _, ligne in df_freq.iterrows():
-        lignes.append(
-            f"| {int(ligne['freq_rebal_jours'])}j | {_fmt(ligne['pnl_moyen'])} | {_fmt(ligne['pnl_ecart_type'])} | "
-            f"{_fmt(ligne['pnl_erreur_std'])} |"
-        )
-    return "\n".join(lignes)
-
-
 def main():
     contenu = "\n\n".join([
         "# Résultats numériques du mémoire",
         "Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par "
         "`scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py`, "
-        "`figC_volatility_target.py` et `figD_hedging_produit_notebook.py` "
+        "`figC_hedging_produit_notebook.py` et `figD_volatility_target.py` "
         "(seed globale unique, `src/marche.py::SEED_GLOBAL`). "
         "**Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer "
         "si un paramètre ou une seed change.",

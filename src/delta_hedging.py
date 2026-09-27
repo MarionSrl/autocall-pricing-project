@@ -1,5 +1,5 @@
 """Grille de delta/gamma et simulation de couverture en delta hedging
-(Figure D, section III.2 du mémoire).
+(Figure C, section III.2 du mémoire).
 
 Porte le moteur de couverture du notebook (`construire_grille_delta` /
 `simuler_delta_hedging`) en module réutilisable, en s'appuyant sur le pricer
@@ -30,7 +30,7 @@ gamma-trading est :
 
 (σ_modèle² en premier, pas σ_réalisée² -- c'est l'inverse de la formule
 souvent citée de façon informelle pour un *acheteur* d'option). Vérifié
-empiriquement dans scripts/figD_hedging_produit_notebook.py : avec cette
+empiriquement dans scripts/figC_hedging_produit_notebook.py : avec cette
 convention, la prédiction théorique reproduit bien le signe et l'ordre de
 grandeur du P&L simulé pour les 4 niveaux de volatilité réalisée testés.
 
@@ -38,7 +38,7 @@ Point de vue et signe de gamma_$ (à ne pas confondre) : gamma_$ = S0*f''(S)
 est le gamma de f(S), la valeur actualisée du flux versé A L'INVESTISSEUR --
 exactement la même fonction, et la même convention (aucun changement de
 perspective), que celle utilisée pour le vega de l'autocall en Figure A. Ce
-n'est PAS le gamma "de position" de l'émetteur. Sur le produit de la Figure D,
+n'est PAS le gamma "de position" de l'émetteur. Sur le produit de la Figure C,
 gamma_$ est négatif (f est concave près du spot initial : l'investisseur est
 structurellement "court" l'optionalité de barrière -- le put down-and-in --
 cédée à l'émetteur en échange du coupon), tout comme le vega de l'autocall en

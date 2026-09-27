@@ -1,10 +1,10 @@
-"""Figure D — Delta hedging et risques résiduels de couverture (section III.2).
+"""Figure C — Delta hedging et risques résiduels de couverture (section III.2).
 
 ATTENTION, à lire avant interprétation : cette figure porte sur le produit du
 notebook d'exploration (notebooks/Pricer_Autocall_MC.ipynb) -- 5 ans, coupon
 FIXE 7% (non résolu au pair), volatilité modèle 20%, sans dividende -- et non
-sur le produit de référence des Figures A-C (10 ans, coupon résolu au pair,
-q=3%). Voir le README pour la justification de ce choix : le mécanisme
+sur le produit de référence des Figures A, B et D (10 ans, coupon résolu au
+pair, q=3%). Voir le README pour la justification de ce choix : le mécanisme
 démontré ici (risque résiduel de gap aux barrières, sensibilité au mismatch
 de volatilité) est structurel au produit autocall à barrières et ne dépend
 pas de la maturité ni du niveau de coupon.
@@ -19,8 +19,8 @@ rebalancement (1/5/10/20 jours) -- résultat volontairement contre-intuitif :
 la dispersion reste quasi plate, le risque résiduel vient des discontinuités
 de payoff aux barrières (gap risk), pas de la granularité du rebalancement.
 
-Écrit figures/figureD_hedging.png (300 dpi) et les résultats numériques dans
-figures/figureD_*.{csv,md}.
+Écrit figures/figureC_hedging.png (300 dpi) et les résultats numériques dans
+figures/figureC_*.{csv,md}.
 """
 
 import os
@@ -40,7 +40,7 @@ from src.delta_hedging import construire_grille_delta_gamma, simuler_couverture
 from src.style_graphique import appliquer_style, PALETTE
 from src.reporting import ecrire_csv_et_md
 
-# Produit du NOTEBOOK (5 ans) -- distinct du produit de référence des Figures A-C.
+# Produit du NOTEBOOK (5 ans) -- distinct du produit de référence des Figures A, B et D.
 S0 = 100.0
 R = 0.03
 Q = 0.0
@@ -212,7 +212,7 @@ def tracer_figure(df_vol, resume, df_freq, pnls_par_freq):
     ax_b.set_ylabel("PnL de couverture (base nominal 100)")
 
     fig.tight_layout()
-    chemin = os.path.join(REPERTOIRE_FIGURES, "figureD_hedging.png")
+    chemin = os.path.join(REPERTOIRE_FIGURES, "figureC_hedging.png")
     fig.savefig(chemin, dpi=300)
     plt.close(fig)
     print(f"Figure enregistrée : {chemin}")
@@ -238,7 +238,7 @@ def main():
     df_freq, df_freq_brut, pnls_par_freq = panneau_b_pnl_vs_frequence(interp_delta, interp_gamma, prix_init)
     print(df_freq.to_string(index=False))
 
-    ecrire_csv_et_md(df_vol, os.path.join(REPERTOIRE_FIGURES, "figureD_pnl_vs_vol_realisee"), float_format="{:.4f}")
+    ecrire_csv_et_md(df_vol, os.path.join(REPERTOIRE_FIGURES, "figureC_pnl_vs_vol_realisee"), float_format="{:.4f}")
     note_gamma = (
         "*Convention de signe (cf. `src/delta_hedging.py`) : `gamma_moyen_dollar` et "
         "`gamma_s2_moyen` sont le gamma de f(S,sigma), la valeur actualisée du flux "
@@ -255,9 +255,9 @@ def main():
         "livre couvert, d'où le PnL de couverture croissant avec la volatilité "
         "réalisée (panneau a).*"
     )
-    ecrire_csv_et_md(resume, os.path.join(REPERTOIRE_FIGURES, "figureD_resume"), float_format="{:.5f}", note=note_gamma)
-    ecrire_csv_et_md(df_freq, os.path.join(REPERTOIRE_FIGURES, "figureD_pnl_vs_frequence"), float_format="{:.4f}")
-    df_freq_brut.to_csv(os.path.join(REPERTOIRE_FIGURES, "figureD_pnl_vs_frequence_brut.csv"), index=False)
+    ecrire_csv_et_md(resume, os.path.join(REPERTOIRE_FIGURES, "figureC_resume"), float_format="{:.5f}", note=note_gamma)
+    ecrire_csv_et_md(df_freq, os.path.join(REPERTOIRE_FIGURES, "figureC_pnl_vs_frequence"), float_format="{:.4f}")
+    df_freq_brut.to_csv(os.path.join(REPERTOIRE_FIGURES, "figureC_pnl_vs_frequence_brut.csv"), index=False)
 
     tracer_figure(df_vol, resume, df_freq, pnls_par_freq)
     print(f"Terminé en {time.time() - t0:.1f}s")

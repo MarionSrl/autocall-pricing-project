@@ -41,17 +41,7 @@ commun).
 
 **Redondance avec `RESULTATS.md`** : les panneaux (a) et (c) sont **chacun une mise en barres de colonnes déjà présentes telles quelles dans la table `RESULTATS.md`** (coupon_pair, proba_pdi_actif, perte_moyenne_cond) — valeur ajoutée = lisibilité comparative, pas d'information nouvelle. Le panneau (b), en revanche, est **la seule sortie graphique ou tabulaire qui montre la répartition par date** (t1...t10) : le CSV complet a ces colonnes, mais `RESULTATS.md` n'affiche que l'agrégat "proba rappel avant maturité".
 
-### `figureC_volatility_target.png` (3 panneaux)
-
-| Panneau | Axes / séries | Plage | Ce qu'il démontre |
-|---|---|---|---|
-| Trajectoire type | x = années (0→5), y gauche = niveau (base 100), y droite = exposition e_t (%) ; 3 séries (sous-jacent, indice VT, exposition) | niveau ~80-150, exposition ~35%-150% | L'exposition oscille nettement entre le plafond (150%) en régime calme et ~35-40% en stress, au gré des changements de régime |
-| Distribution vol réalisée | x = vol réalisée annualisée de l'indice VT (%), y = nombre de trajectoires (histogramme, 5000 tirages) + ligne cible 15% + ligne moyenne | vol ~12%-21% | La distribution est centrée sur 16.0%, **pas sur la cible 15%** — biais asymétrique vers le haut |
-| Scénario V | x = jours (0→185), y = niveau (base 100), 3 courbes (nu, VT 20j, VT 60j) | creux ~64-70, plateau final ~82 | Sur-réaction à la chute (VT tombe sous le nu) puis sous-participation persistante au rebond |
-
-**Redondance avec `RESULTATS.md`** : la moyenne de vol réalisée, la sous-participation (20j/60j) et l'écart en fin de scénario sont repris en table — mais **la forme des courbes** (trajectoire type sur 5 ans, forme de la distribution, dynamique jour par jour du scénario V) n'est disponible nulle part ailleurs que dans le graphique ou le CSV brut (1261 et 187 lignes respectivement). Aucun panneau candidat à la coupe ici : les trois portent une information distincte et aucune n'est un simple doublon de table.
-
-### `figureD_hedging.png` (2 panneaux) — ajoutée depuis la première version de cet inventaire
+### `figureC_hedging.png` (2 panneaux)
 
 | Panneau | Axes / séries | Plage | Ce qu'il démontre |
 |---|---|---|---|
@@ -60,7 +50,17 @@ commun).
 
 **Redondance avec `RESULTATS.md`** : le gamma moyen, le temps de sortie moyen, et les 4+4 points (PnL moyen par vol/fréquence) sont repris en table. Les courbes/distributions complètes (grille delta/gamma 40×25×3, 2000 trajectoires brutes par scénario) ne le sont pas — cohérent avec le reste du repo, aucune redondance à signaler.
 
-**Porte sur un produit distinct** (5 ans, coupon fixe 7%, vol modèle 20%, sans dividende) des Figures A-C (10 ans, coupon au pair, q=3%) — voir le README pour la justification. Les niveaux de PnL ne sont donc pas directement comparables aux coupons de la Figure B.
+**Porte sur un produit distinct** (5 ans, coupon fixe 7%, vol modèle 20%, sans dividende) des Figures A, B et D (10 ans, coupon au pair, q=3%) — voir le README pour la justification. Les niveaux de PnL ne sont donc pas directement comparables aux coupons de la Figure B.
+
+### `figureD_volatility_target.png` (3 panneaux)
+
+| Panneau | Axes / séries | Plage | Ce qu'il démontre |
+|---|---|---|---|
+| Trajectoire type | x = années (0→5), y gauche = niveau (base 100), y droite = exposition e_t (%) ; 3 séries (sous-jacent, indice VT, exposition) | niveau ~80-150, exposition ~35%-150% | L'exposition oscille nettement entre le plafond (150%) en régime calme et ~35-40% en stress, au gré des changements de régime |
+| Distribution vol réalisée | x = vol réalisée annualisée de l'indice VT (%), y = nombre de trajectoires (histogramme, 5000 tirages) + ligne cible 15% + ligne moyenne | vol ~12%-21% | La distribution est centrée sur 16.0%, **pas sur la cible 15%** — biais asymétrique vers le haut |
+| Scénario V | x = jours (0→185), y = niveau (base 100), 3 courbes (nu, VT 20j, VT 60j) | creux ~64-70, plateau final ~82 | Sur-réaction à la chute (VT tombe sous le nu) puis sous-participation persistante au rebond |
+
+**Redondance avec `RESULTATS.md`** : la moyenne de vol réalisée, la sous-participation (20j/60j) et l'écart en fin de scénario sont repris en table — mais **la forme des courbes** (trajectoire type sur 5 ans, forme de la distribution, dynamique jour par jour du scénario V) n'est disponible nulle part ailleurs que dans le graphique ou le CSV brut (1261 et 187 lignes respectivement). Aucun panneau candidat à la coupe ici : les trois portent une information distincte et aucune n'est un simple doublon de table.
 
 ### Synthèse — que couper si besoin de place
 
@@ -79,15 +79,15 @@ Les deux fusions à faible coût identifiées ont été appliquées à la demand
 | `figureA_autocall_vega.csv` (19 lignes) | spot, prix, erreur_std_prix_pct, vega_total_pct, erreur_std_vega_total_pct, vega_leg_sans_pdi_pct, vega_leg_pdi_pct | Non (seul le zéro dérivé séparément) | Le prix de l'autocall par spot (colonne `prix`, ex. 34.46 à spot 40, 108.07 à spot 130) et la décomposition complète des deux jambes par spot ne sont citées nulle part |
 | `figureA_validations.csv` (7 lignes) | validation, resultat, reference, ecart_relatif_pct | Oui (résumé : écart max parité KI+KO, écart MC vs formule fermée) | Le détail des 6 écarts de parité individuels (tous nuls) reste seulement dans ce fichier — RESULTATS.md n'en cite que le max |
 | `figureB_resultats.csv` (6 lignes) | cas, forward_theorique_10y, coupon_pair_pct, prix_verif_pct, erreur_std_mc_pct, proba_maturite_pct, proba_pdi_actif_pct, perte_moyenne_cond_pct, proba_rappel_t1...t10_pct | Partiellement (6 des ~17 colonnes) | **Les 10 colonnes `proba_rappel_t1...t10`** (probabilité de rappel à *chaque* date d'observation, par cas) ne sont reprises ni en table ni en texte — seul le graphique (b) les montre visuellement |
-| `figureC_distribution_vol_realisee.csv` | sigma_cible_pct, vol_realisee_moyenne_pct, vol_realisee_mediane_pct, vol_realisee_ecart_type_pct, proba_dans_plus_ou_moins_2pt_pct | Oui (5 des 5) | — |
-| `figureC_scenario_v.csv` (187 lignes) | jour, indice_nu, indice_vt_20j, exposition_20j_pct, indice_vt_60j, exposition_60j_pct | Non (le résumé seul l'est) | La trajectoire jour par jour reste seulement dans ce fichier / le graphique — le creux (niveau_plancher_*) est désormais calculé dans `figureC_scenario_v_resume.csv` et cité |
-| `figureC_scenario_v_resume.csv` | fenetre_jours, niveau_indice_nu_fin_rebond, niveau_indice_vt_fin_rebond, sous_participation_pts, niveau_indice_vt_fin_episode, niveau_plancher_indice_nu, niveau_plancher_indice_vt | Oui (sous_participation, écart fin épisode, et désormais les 2 planchers) | — |
-| `figureC_trajectoire_type.csv` (1261 lignes) | annee, indice_sous_jacent, indice_vt, exposition_pct | Non | La trajectoire jour par jour reste seulement dans ce fichier / le graphique — le % de temps au plafond est désormais calculé dans `figureC_trajectoire_type_resume.csv` et cité ; l'écart final indice nu vs VT n'est pas repris (chiffre à un seul chemin, moins généralisable que les moyennes de la sortie 2) |
-| `figureC_trajectoire_type_resume.csv` (nouveau) | pct_temps_exposition_plafond | Oui | — |
-| `figureD_pnl_vs_vol_realisee.csv` (4 lignes) | vol_realisee_pct, pnl_moyen, pnl_erreur_std, nb_trajectoires, pnl_theorique | Oui (pnl_moyen, pnl_erreur_std, pnl_theorique) | — |
-| `figureD_resume.csv` | gamma_moyen_dollar, gamma_s2_moyen, temps_sortie_moyen_annees, prix_initial_pct, nb_trajectoires_grille_delta, nb_trajectoires_couverture_par_scenario, coupon_pct, maturite_annees, vol_modele_pct | Oui (gamma_moyen_dollar, gamma_s2_moyen, temps_sortie_moyen_annees, prix_initial_pct, les 2 nb_trajectoires) | — |
-| `figureD_pnl_vs_frequence.csv` (4 lignes) | freq_rebal_jours, pnl_moyen, pnl_ecart_type, pnl_erreur_std, nb_trajectoires | Oui (pnl_moyen, pnl_ecart_type, pnl_erreur_std) | — |
-| `figureD_pnl_vs_frequence_brut.csv` (8000 lignes) | freq_rebal_jours, pnl | Non (résumé seul) | La distribution complète (asymétrie, queues épaisses visibles sur le boxplot) n'est décrite que visuellement, jamais quantifiée (skewness, quantiles) |
+| `figureC_pnl_vs_vol_realisee.csv` (4 lignes) | vol_realisee_pct, pnl_moyen, pnl_erreur_std, nb_trajectoires, pnl_theorique | Oui (pnl_moyen, pnl_erreur_std, pnl_theorique) | — |
+| `figureC_resume.csv` | gamma_moyen_dollar, gamma_s2_moyen, temps_sortie_moyen_annees, prix_initial_pct, nb_trajectoires_grille_delta, nb_trajectoires_couverture_par_scenario, coupon_pct, maturite_annees, vol_modele_pct | Oui (gamma_moyen_dollar, gamma_s2_moyen, temps_sortie_moyen_annees, prix_initial_pct, les 2 nb_trajectoires) | — |
+| `figureC_pnl_vs_frequence.csv` (4 lignes) | freq_rebal_jours, pnl_moyen, pnl_ecart_type, pnl_erreur_std, nb_trajectoires | Oui (pnl_moyen, pnl_ecart_type, pnl_erreur_std) | — |
+| `figureC_pnl_vs_frequence_brut.csv` (8000 lignes) | freq_rebal_jours, pnl | Non (résumé seul) | La distribution complète (asymétrie, queues épaisses visibles sur le boxplot) n'est décrite que visuellement, jamais quantifiée (skewness, quantiles) |
+| `figureD_distribution_vol_realisee.csv` | sigma_cible_pct, vol_realisee_moyenne_pct, vol_realisee_mediane_pct, vol_realisee_ecart_type_pct, proba_dans_plus_ou_moins_2pt_pct | Oui (5 des 5) | — |
+| `figureD_scenario_v.csv` (187 lignes) | jour, indice_nu, indice_vt_20j, exposition_20j_pct, indice_vt_60j, exposition_60j_pct | Non (le résumé seul l'est) | La trajectoire jour par jour reste seulement dans ce fichier / le graphique — le creux (niveau_plancher_*) est désormais calculé dans `figureD_scenario_v_resume.csv` et cité |
+| `figureD_scenario_v_resume.csv` | fenetre_jours, niveau_indice_nu_fin_rebond, niveau_indice_vt_fin_rebond, sous_participation_pts, niveau_indice_vt_fin_episode, niveau_plancher_indice_nu, niveau_plancher_indice_vt | Oui (sous_participation, écart fin épisode, et désormais les 2 planchers) | — |
+| `figureD_trajectoire_type.csv` (1261 lignes) | annee, indice_sous_jacent, indice_vt, exposition_pct | Non | La trajectoire jour par jour reste seulement dans ce fichier / le graphique — le % de temps au plafond est désormais calculé dans `figureD_trajectoire_type_resume.csv` et cité ; l'écart final indice nu vs VT n'est pas repris (chiffre à un seul chemin, moins généralisable que les moyennes de la sortie 2) |
+| `figureD_trajectoire_type_resume.csv` | pct_temps_exposition_plafond | Oui | — |
 
 ### Chiffres disponibles auxquels tu n'as pas accès aujourd'hui (hors CSV/graphique)
 
@@ -96,7 +96,7 @@ Ce sont des nombres déjà calculés par les scripts, visibles seulement dans le
 1. **Les 10 probabilités de rappel par date, par cas** (Figure B) — 60 chiffres au total, seulement visualisés, jamais tabulés en dehors du CSV brut.
 2. **Le prix complet de l'autocall par spot** (panneau d de la Figure A) — seule la localisation du zéro de vega est citée, pas le niveau de prix associé.
 
-Les autres éléments listés dans une version antérieure de cet inventaire (validations de la Figure A, médiane/écart-type/proba ±2pt de la vol réalisée VT, creux du scénario V, % de temps à l'exposition plafond, `gamma_s2_moyen`, erreurs std du PnL de la Figure D) sont désormais dans `RESULTATS.md`.
+Les autres éléments listés dans une version antérieure de cet inventaire (validations de la Figure A, médiane/écart-type/proba ±2pt de la vol réalisée VT, creux du scénario V, % de temps à l'exposition plafond, `gamma_s2_moyen`, erreurs std du PnL de la Figure C) sont désormais dans `RESULTATS.md`.
 
 ---
 
@@ -120,28 +120,28 @@ Le notebook complet (100 000 trajectoires pour le pricer principal, grille de de
 4 min 43 s.
 
 **Point d'attention important, toujours valable** : le produit utilisé par le notebook
-est **différent** de celui des Figures A-C — maturité 5 ans (pas 10), coupon fixe à 7%
-(pas résolu au pair), volatilité 20% (pas 18%), pas de dividende `q`.
+est **différent** de celui des Figures A, B et D — maturité 5 ans (pas 10), coupon fixe
+à 7% (pas résolu au pair), volatilité 20% (pas 18%), pas de dividende `q`.
 
 **Mise à jour majeure : les sections 3.1 à 3.3 sont maintenant exploitées.** Plutôt que
 de laisser ces analyses dans le notebook, elles ont été portées en module réutilisable
 (`src/delta_hedging.py` : grille delta/gamma par bump-and-reprice réutilisant
 `pricer_autocall`, simulateur de couverture path-dépendant) et publiées comme
-**Figure D** (`figD_hedging_produit_notebook.py`, panneaux "PnL vs vol réalisée +
+**Figure C** (`figC_hedging_produit_notebook.py`, panneaux "PnL vs vol réalisée +
 prédiction théorique" et "dispersion PnL vs fréquence de rebalancement"), sur le
 produit du notebook (le choix de ne pas porter vers le produit à 10 ans est resté celui
-retenu — voir le README). Les résultats ci-dessous sont ceux de la Figure D (seed
+retenu — voir le README). Les résultats ci-dessous sont ceux de la Figure C (seed
 globale, 2000 trajectoires par scénario, donc légèrement différents des premiers essais
 notebook à 300-500 trajectoires et seed locale, mais du même ordre de grandeur).
 
-### 3.1 Delta hedging — PnL principal — **exploité (Figure D)**
+### 3.1 Delta hedging — PnL principal — **exploité (Figure C)**
 
-**Résultat obtenu (Figure D, scénario de référence vol=20%=modèle, freq=5j, 2000
+**Résultat obtenu (Figure C, scénario de référence vol=20%=modèle, freq=5j, 2000
 trajectoires)** : PnL moyen = **+1.16**, cohérent avec une couverture non biaisée. La
 grille de delta/gamma sous-jacente (25 spots × 40 temps × 3 évaluations bump-reprice)
 est construite en ~3.5s en réutilisant `pricer_autocall`.
 
-### 3.2 PnL par fréquence de rebalancement — **exploité (Figure D, panneau b)**
+### 3.2 PnL par fréquence de rebalancement — **exploité (Figure C, panneau b)**
 
 **Résultat obtenu** :
 
@@ -157,7 +157,7 @@ fréquence (vs 300 dans le notebook d'origine) : le risque résiduel du hedging 
 discontinuités de payoff aux barrières (gap risk), pas de la granularité du
 rebalancement.
 
-### 3.3 Mismatch volatilité réalisée vs volatilité de couverture — **exploité (Figure D, panneau a)**
+### 3.3 Mismatch volatilité réalisée vs volatilité de couverture — **exploité (Figure C, panneau a)**
 
 **Résultat obtenu, avec prédiction théorique superposée** (voir `src/delta_hedging.py`
 pour la convention de signe — un hedger qui vend le produit et couvre au delta modèle
@@ -197,7 +197,7 @@ aborde la robustesse de l'hypothèse de taux constant.
 
 ### 3.5 Grille de delta (et désormais gamma) pré-calculée — **portée dans `src/delta_hedging.py`, pas encore affichée en heatmap**
 
-La grille existe et est utilisée en interne par la Figure D (`construire_grille_delta_gamma`,
+La grille existe et est utilisée en interne par la Figure C (`construire_grille_delta_gamma`,
 25 spots × 40 temps, delta ET gamma désormais, ~3.5s), mais n'est pas exposée comme
 panneau visuel indépendant (contrairement au notebook qui en fait une figure à part,
 cellule 43). **Reste à faire, effort très faible** (les données existent déjà, il ne
@@ -220,10 +220,10 @@ place (`simuler_indices`, `pricer_autocall`, `coupon_solver`, `barrier_options`,
 | **Sensibilité du coupon à la pente/plancher de la barrière dégressive** (reboucler `barriere_degressive` + `coupon_solver`) | Faible | Moyen — approfondit la comparaison C′ vs A+dégressive déjà présente | Optionnel |
 | **PDI fermé à plusieurs maturités** (courbes prix/delta/vega/vanna du panneau (a)-(c) pour T=0.5/1/2/5 ans) | Faible — un paramètre à boucler dans `pdi_grecques` | Moyen — illustre la structure par terme des sensibilités du PDI | Optionnel |
 | **Sensibilité de l'indice C au paramètre K** (décrément en points) | Faible | Moyen — approfondit le point de vigilance déjà démontré (K=5 donne un coupon extrême) | Optionnel |
-| **Sensibilité de l'indice VT à σ_cible et L_max** (rejouer sortie 2/3 de la Figure C avec d'autres valeurs) | Faible-moyen | Moyen — renforce III.3.2 (le biais dépend des paramètres de construction, pas seulement du mécanisme) | Optionnel |
+| **Sensibilité de l'indice VT à σ_cible et L_max** (rejouer sortie 2/3 de la Figure D avec d'autres valeurs) | Faible-moyen | Moyen — renforce III.3.2 (le biais dépend des paramètres de construction, pas seulement du mécanisme) | Optionnel |
 | ~~Statistique de synthèse manquantes du §2~~ (creux du scénario V, % de temps au plafond L_max sur la trajectoire type, médiane/écart-type de la vol réalisée) | Très faible | Faible-moyen | **Fait** — dans `RESULTATS.md` |
-| **Heatmap delta/gamma(temps, spot)** (les grilles existent déjà dans `src/delta_hedging.py`, juste jamais tracées) | Très faible — `pcolormesh` + CSV, aucune nouvelle simulation | Faible-moyen — illustration d'appui pour la Figure D, pas indispensable | **À faire si le temps le permet, c'est presque gratuit** |
-| **Delta hedging sur le produit du mémoire (10 ans, coupon au pair)** (porter `src/delta_hedging.py` du produit notebook vers `src/pricer_autocall.py`) | Élevé — même module réutilisable, mais nouvelle grille + nouvelles simulations de couverture à faire tourner et valider | Élevé — chiffres directement comparables aux coupons de la Figure B | Reste "non peu coûteux" malgré la Figure D — voir §3 |
+| **Heatmap delta/gamma(temps, spot)** (les grilles existent déjà dans `src/delta_hedging.py`, juste jamais tracées) | Très faible — `pcolormesh` + CSV, aucune nouvelle simulation | Faible-moyen — illustration d'appui pour la Figure C, pas indispensable | **À faire si le temps le permet, c'est presque gratuit** |
+| **Delta hedging sur le produit du mémoire (10 ans, coupon au pair)** (porter `src/delta_hedging.py` du produit notebook vers `src/pricer_autocall.py`) | Élevé — même module réutilisable, mais nouvelle grille + nouvelles simulations de couverture à faire tourner et valider | Élevé — chiffres directement comparables aux coupons de la Figure B | Reste "non peu coûteux" malgré la Figure C — voir §3 |
 | **Modèle de smile / skew de volatilité** | Élevé — nouveau moteur (vol locale ou stochastique calibrée) | — | **Pas rentable** dans le temps restant |
 | **Produit worst-of multi-actifs** | Élevé — nouveau moteur (corrélation, plusieurs sous-jacents) | — | **Pas rentable** |
 | **Pricer EDP** | Élevé — nouvelle méthode numérique complète | Faible (le MC suffit à démontrer les points du mémoire) | **Pas rentable** |
@@ -242,14 +242,14 @@ place (`simuler_indices`, `pricer_autocall`, `coupon_solver`, `barrier_options`,
 | Figure B, panneau (b) — dates de rappel | Le décrément retarde le rappel | III.1.3 | **Exploité** |
 | Colonnes `proba_rappel_t1...t10` | Détail par date, par cas | III.1.3 | Disponible, non tabulé (§2) |
 | Sensibilité coupon à σ/r | Robustesse de la thèse décrément | III.1.3 | À produire (effort moyen, §4) |
-| Figure D, panneau (a) — PnL vs vol réalisée (mismatch) | `PnL ≈ ½Γ(σ_modèle²−σ_réal²)`, formule validée par la simulation | III.2 | **Exploité (Figure D)** |
-| Figure D, panneau (b) — PnL vs fréquence de rebalancement | Fréquence ≈ sans effet sur la dispersion, le gap risk domine | III.2 | **Exploité (Figure D)** |
-| `figureD_resume.csv` (gamma moyen, trajectoires) | Chiffres citables (gamma moyen dollar, nb trajectoires) | III.2 | **Exploité (Figure D)** |
+| Figure C, panneau (a) — PnL vs vol réalisée (mismatch) | `PnL ≈ ½Γ(σ_modèle²−σ_réal²)`, formule validée par la simulation | III.2 | **Exploité (Figure C)** |
+| Figure C, panneau (b) — PnL vs fréquence de rebalancement | Fréquence ≈ sans effet sur la dispersion, le gap risk domine | III.2 | **Exploité (Figure C)** |
+| `figureC_resume.csv` (gamma moyen, trajectoires) | Chiffres citables (gamma moyen dollar, nb trajectoires) | III.2 | **Exploité (Figure C)** |
 | Grille de delta/gamma (heatmap) | Delta/gamma instables près des barrières | III.2 | Grille disponible dans `src/delta_hedging.py`, pas encore tracée (§3.5, §4) |
-| Delta hedging sur le produit du mémoire (10 ans, coupon au pair) | Idem, mais chiffres directement comparables à Figure B | III.2 | **À produire, effort élevé** (§3.1) — Figure D porte sur le produit 5 ans du notebook, pas ce produit-ci |
-| Figure C, trajectoire type | Exposition oscille entre plafond et désensibilisation | III.3.1 | **Exploité** |
-| Figure C, scénario V | Sur-réaction à la chute + sous-participation au rebond | III.3.1 | **Exploité** |
+| Delta hedging sur le produit du mémoire (10 ans, coupon au pair) | Idem, mais chiffres directement comparables à Figure B | III.2 | **À produire, effort élevé** (§3.1) — Figure C porte sur le produit 5 ans du notebook, pas ce produit-ci |
+| Figure D, trajectoire type | Exposition oscille entre plafond et désensibilisation | III.3.1 | **Exploité** |
+| Figure D, scénario V | Sur-réaction à la chute + sous-participation au rebond | III.3.1 | **Exploité** |
 | Creux exact du scénario V | Quantifie la sur-exposition avant le choc | III.3.1 | **Exploité** (dans `RESULTATS.md`) |
-| Figure C, distribution vol réalisée | La vol réalisée VT ≠ la cible, biais asymétrique | III.3.2 | **Exploité** |
+| Figure D, distribution vol réalisée | La vol réalisée VT ≠ la cible, biais asymétrique | III.3.2 | **Exploité** |
 | Médiane / écart-type / proba ±2pt de la distribution | Précision du biais | III.3.2 | **Exploité** (dans `RESULTATS.md`) |
 | Sensibilité VT à σ_cible / L_max | Le biais dépend des paramètres de construction | III.3.2 | À produire (effort faible-moyen, §4) |

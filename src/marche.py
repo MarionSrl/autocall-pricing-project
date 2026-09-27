@@ -2,10 +2,10 @@
 
 from dataclasses import dataclass
 
-# Seed globale unique (spec §4) : source unique pour les 3 scripts de figure
-# (figA_*.py, figB_*.py, figC_*.py), afin qu'une même quantité recalculée dans
-# deux figures (ex. le coupon au pair de l'indice classique) reproduise
-# exactement le même chiffre. Ne pas dupliquer cette valeur ailleurs.
+# Seed globale unique (spec §4) : source unique pour les 4 scripts de figure
+# (figA_*.py, figB_*.py, figC_*.py, figD_*.py), afin qu'une même quantité
+# recalculée dans deux figures (ex. le coupon au pair de l'indice classique)
+# reproduise exactement le même chiffre. Ne pas dupliquer cette valeur ailleurs.
 SEED_GLOBAL = 2026
 
 
