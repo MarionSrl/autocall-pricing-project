@@ -130,7 +130,7 @@ terme ou le sourire de volatilité du marché. Elle a cependant un coût : en pr
 skew de volatilité affecterait différemment les sensibilités mesurées à proximité des
 barrières, qu'il s'agisse du rappel ou de la protection du capital, et son absence tend
 probablement à sous-estimer l'ampleur des sensibilités mises en évidence dans les
-Figures A et C.
+Figures A et D.
 
 La notion de barrière recouvre par ailleurs deux conventions distinctes dans ce travail,
 qu'il convient de ne pas confondre. La protection du capital (PDI) du produit autocall
