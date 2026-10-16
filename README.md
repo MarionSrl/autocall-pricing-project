@@ -1,7 +1,7 @@
 # Pricing d'un produit Autocallable — Mémoire BFA3
 
 Pricer Monte Carlo d'un produit autocallable sous Black-Scholes, utilisé pour produire
-les 4 figures quantitatives du mémoire *Comment les indices de nouvelle génération
+les 5 figures quantitatives du mémoire *Comment les indices de nouvelle génération
 (Volatility Target et indices à décrément) permettent-ils de répondre aux contraintes
 de structuration, de valorisation et de couverture des produits structurés actions de
 long terme ?*
@@ -14,7 +14,7 @@ long terme ?*
 | `src/` | Modules de pricing : simulation, indices A/B/C, pricer autocall, PDI, coupon, Volatility Target, delta hedging |
 | `scripts/` | Un script par figure du mémoire, plus `run_all.py` pour tout régénérer |
 | `figures/` | PNG (300 dpi) et CSV/MD de résultats, un jeu par figure |
-| `tests/` | Tests pytest (35) |
+| `tests/` | Tests pytest (40) |
 | `RESULTATS.md` | Tous les chiffres cités dans le mémoire, regroupés par figure |
 
 ## Installation et reproduction
@@ -22,8 +22,8 @@ long terme ?*
 ```bash
 pip install -r requirements.txt
 
-python scripts/run_all.py   # régénère les 4 figures + RESULTATS.md (~5 min)
-pytest tests/                # lance les 35 tests
+python scripts/run_all.py   # régénère les 5 figures + RESULTATS.md (~20 min, Figure E ~16 min)
+pytest tests/                # lance les 40 tests
 ```
 
 Chaque figure peut aussi être relancée seule, par exemple :
@@ -38,9 +38,9 @@ Autocall 10 ans, observations annuelles, barrière de rappel à 100 % du niveau 
 coupon **à mémoire** (cumulé depuis l'origine, versé uniquement à la date de rappel —
 si le produit n'est jamais rappelé, aucun coupon n'est versé à maturité), protection du
 capital (PDI) à 60 %, **observée à maturité uniquement**. C'est le produit des Figures
-A, B et D. La **Figure C fait exception** : voir sa description ci-dessous.
+A, B, D et E. La **Figure C fait exception** : voir sa description ci-dessous.
 
-## Les 4 figures
+## Les 5 figures
 
 **Figure A — Sensibilités du PDI et de l'autocall** (`figA_sensibilites_pdi_autocall.py`).
 Formule fermée d'un put down-and-in (prix, delta, vega, vanna), puis vega Monte Carlo
@@ -65,6 +65,15 @@ produit de référence des Figures A, B et D** — voir « Conventions à conna�
 sur un modèle de volatilité à 2 régimes : trajectoire type, distribution de la vol
 réalisée face à la cible, et scénario de crash-rebond scripté.
 
+**Figure E — Indice Volatility Target et décrément** (`figE_vol_target_decrement.py`).
+Sur le produit de référence (identique à la Figure B) et le même modèle de volatilité à
+2 régimes que la Figure D, compare le coupon au pair, la vol réalisée moyenne, les
+probabilités de rappel et d'activation du PDI, et la perte conditionnelle, sur 5
+configurations d'indice sous-jacent : indice classique (price return), Volatility
+Target seul (cibles 15 % et 10 %), puis Volatility Target 15 % combiné à un décrément
+(en % et en points). Toutes les configurations partagent les mêmes trajectoires
+browniennes.
+
 Tous les chiffres (coupons, sensibilités, sous-participation, gamma moyen...) sont
 dans **[`RESULTATS.md`](RESULTATS.md)**.
 
@@ -80,8 +89,8 @@ dans **[`RESULTATS.md`](RESULTATS.md)**.
   down-and-in à barrière continûment observée (formule fermée classique), dont la
   validation Monte Carlo utilise une correction de continuité par pont brownien.
 - **Pas de coûts de transaction** (réplication du décrément, rebalancement quotidien
-  de l'indice Volatility Target ou du hedge de la Figure C) : les mécanismes sont
-  présentés dans leur configuration la plus favorable.
+  de l'indice Volatility Target — Figures D et E — ou du hedge de la Figure C) : les
+  mécanismes sont présentés dans leur configuration la plus favorable.
 - **La Figure C porte sur un produit différent des Figures A, B et D** : maturité 5 ans
   (pas 10), coupon fixe à 7 % (pas résolu au pair), volatilité modèle 20 % (pas 18 %),
   pas de dividende. C'est le produit du notebook d'exploration original, réutilisé tel
@@ -187,6 +196,21 @@ calme ne le ferait. L'effet de sur-exposition au moment du choc qui en résulte 
 probablement amplifié par cette construction ; l'effet de sous-participation au rebond
 qui suit, piloté non par le niveau de volatilité pré-choc mais par le retard structurel
 inhérent à toute fenêtre glissante, est en revanche robuste à cette simplification.
+
+La Figure E reprend ce même modèle de volatilité à deux régimes pour construire un
+indice Volatility Target au sens risque-neutre : une jambe risquée en total return
+(dividendes réinvestis, drift r) et une poche de cash rémunérée à r, pondérées chaque
+jour par un levier plafonné L_t = min(L_max, σ_cible / σ̂_t), où σ̂_t est la volatilité
+réalisée sur une fenêtre glissante de 20 jours ouvrés — un estimateur qui, par
+construction, n'utilise que l'information connue à la clôture de la veille, et retarde
+donc nécessairement d'un jour le réajustement du levier par rapport à un choc de
+volatilité instantané. Le décrément, lorsqu'il est combiné au Vol Target, est appliqué
+après coup sur cet indice déjà reconstitué, comme dans les indices propriétaires
+réellement commercialisés. Le décrément en points, path-dépendant et non plafonné à
+zéro par construction (même convention que l'indice C de la Figure B), peut dans de
+rares trajectoires de queue faire passer l'indice en territoire négatif une fois la
+valeur nulle franchie ; cette probabilité est mesurée et reportée telle quelle dans
+`RESULTATS.md`, plutôt que neutralisée par un plancher artificiel.
 
 Enfin, la Figure C, consacrée à la couverture en delta et à ses risques résiduels,
 porte délibérément sur un produit distinct de celui des Figures A, B et D : le produit

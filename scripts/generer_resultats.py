@@ -165,12 +165,34 @@ def section_figureD():
     return "\n".join(lignes)
 
 
+def section_figureE():
+    df = _lire("figureE_resultats.csv")
+    lignes = [
+        "## Figure E — Indice Volatility Target et décrément",
+        "",
+        "| Configuration | Coupon au pair (%) | IC95 (demi-largeur, %) | Vol réalisée moy. (%) | "
+        "Proba. rappel avant maturité (%) | Proba. activation PDI (%) | Perte moy. conditionnelle (%) | "
+        "Forward MC 10 ans | Proba. indice négatif (%) |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for _, ligne in df.iterrows():
+        lignes.append(
+            f"| {ligne['configuration']} | {_fmt(ligne['coupon_pair_pct'])} | "
+            f"{_fmt(ligne['coupon_ic95_demi_largeur_pct'])} | {_fmt(ligne['vol_realisee_moyenne_pct'])} | "
+            f"{_fmt(ligne['proba_rappel_avant_maturite_pct'])} | {_fmt(ligne['proba_pdi_actif_pct'])} | "
+            f"{_fmt(ligne['perte_moyenne_cond_pct'])} | {_fmt(ligne['forward_mc_10y'])} | "
+            f"{_fmt(ligne['proba_indice_negatif_pct'])} |"
+        )
+    return "\n".join(lignes)
+
+
 def main():
     contenu = "\n\n".join([
         "# Résultats numériques du mémoire",
         "Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par "
         "`scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py`, "
-        "`figC_hedging_produit_notebook.py` et `figD_volatility_target.py` "
+        "`figC_hedging_produit_notebook.py`, `figD_volatility_target.py` et "
+        "`figE_vol_target_decrement.py` "
         "(seed globale unique, `src/marche.py::SEED_GLOBAL`). "
         "**Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer "
         "si un paramètre ou une seed change.",
@@ -178,6 +200,7 @@ def main():
         section_figureB(),
         section_figureC(),
         section_figureD(),
+        section_figureE(),
     ])
     chemin = os.path.join(REPERTOIRE_RACINE, "RESULTATS.md")
     with open(chemin, "w") as f:

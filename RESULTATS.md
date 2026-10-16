@@ -1,6 +1,6 @@
 # Résultats numériques du mémoire
 
-Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par `scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py`, `figC_hedging_produit_notebook.py` et `figD_volatility_target.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). **Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer si un paramètre ou une seed change.
+Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par `scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py`, `figC_hedging_produit_notebook.py`, `figD_volatility_target.py` et `figE_vol_target_decrement.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). **Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer si un paramètre ou une seed change.
 
 ## Figure A — Sensibilités du PDI et de l'autocall
 
@@ -67,3 +67,13 @@ Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV p
 | Niveau plancher (creux) de l'indice nu dans le scénario V | 70.00 |
 | Niveau plancher (creux) de l'indice VT dans le scénario V, fenêtre 20j | 63.79 |
 | Niveau plancher (creux) de l'indice VT dans le scénario V, fenêtre 60j | 61.17 |
+
+## Figure E — Indice Volatility Target et décrément
+
+| Configuration | Coupon au pair (%) | IC95 (demi-largeur, %) | Vol réalisée moy. (%) | Proba. rappel avant maturité (%) | Proba. activation PDI (%) | Perte moy. conditionnelle (%) | Forward MC 10 ans | Proba. indice négatif (%) |
+|---|---|---|---|---|---|---|---|---|
+| Indice nu (price return) | 11.46 | 0.10 | 17.71 | 75.03 | 16.07 | 58.26 | 95.27 | 0.00 |
+| Vol Target 15% | 5.89 | 0.05 | 16.17 | 86.59 | 5.94 | 53.50 | 128.49 | 0.00 |
+| Vol Target 10% | 4.35 | 0.03 | 11.86 | 90.06 | 2.00 | 48.58 | 128.46 | 0.00 |
+| Vol Target 15% + décrément 5%/an | 17.42 | 0.16 | 16.17 | 65.96 | 23.73 | 58.60 | 77.93 | 0.00 |
+| Vol Target 15% + décrément points (K=5) | 25.62 | 0.24 | 16.18 | 63.01 | 31.18 | 70.64 | 71.64 | 0.86 |
