@@ -183,9 +183,17 @@ COULEURS = {
     "vt15_decr0": "#d62728",
     "vt15_decr3": "#d62728",
     "vt15_decr5": "#d62728",
-    "vt10_decr3": "#ff7f0e",
+    "vt10_decr3": "#17becf",
     "vt15_decr_pts": "#9467bd",
 }
+
+# Palette du panneau (b) de la figure, délibérément distincte de celle du
+# panneau (a) (bleu/rouge/sarcelle = configuration) : le panneau (b) encode
+# la MÉTRIQUE par la couleur, pas la configuration -- réutiliser bleu/rouge
+# ici créerait une fausse association entre les deux panneaux.
+COULEUR_RAPPEL = "#2ca02c"
+COULEUR_PDI = "#ff7f0e"
+COULEUR_PERTE = "#7f7f7f"
 
 
 TAILLE_LOT = 20_000  # trajectoires par lot -- cf. docstring de construire_configurations
@@ -354,6 +362,29 @@ def coupon_ic95(resultat, r):
     return erreur_std_coupon, 1.96 * erreur_std_coupon
 
 
+def charger_resultats_pour_figure():
+    """Recharge les résultats déjà écrits dans figures/figureE_resultats.csv
+    (aucune nouvelle simulation) -- utile pour régénérer uniquement le rendu
+    de la figure (couleurs, mise en page, annotations) sans relancer les
+    200 000 trajectoires, tant que le CSV reflète déjà la dernière
+    simulation. Reconstruit le même dict que la boucle de `main()` alimente
+    `tracer_figure` avec, à partir des seules colonnes nécessaires au tracé."""
+    chemin_csv = os.path.join(REPERTOIRE_FIGURES, "figureE_resultats.csv")
+    df = pd.read_csv(chemin_csv)
+    libelle_vers_nom = {libelle: nom for nom, libelle in LIBELLES.items()}
+    resultats = {}
+    for _, ligne in df.iterrows():
+        nom = libelle_vers_nom[ligne["configuration"]]
+        resultats[nom] = {
+            "coupon_pair": ligne["coupon_pair_pct"] / 100,
+            "coupon_ic95_demi_largeur": ligne["coupon_ic95_demi_largeur_pct"] / 100,
+            "proba_rappel_avant_maturite": ligne["proba_rappel_avant_maturite_pct"] / 100,
+            "proba_pdi": ligne["proba_pdi_actif_pct"] / 100,
+            "perte_cond": ligne["perte_moyenne_cond_pct"] / 100,
+        }
+    return resultats
+
+
 def main():
     t0 = time.time()
     os.makedirs(REPERTOIRE_FIGURES, exist_ok=True)
@@ -430,22 +461,31 @@ def tracer_figure(resultats):
     appliquer_style()
     fig, (ax_coupon, ax_risque) = plt.subplots(1, 2, figsize=(15, 6.5))
 
-    # --- Panneau principal : grille 2x3 à forward contrôlé, barres groupées
-    # nu vs Vol Target 15% pour chaque niveau de décrément -- lecture directe
-    # de l'effet Vol Target "toutes choses égales par ailleurs" (même forward
-    # théorique sur chaque paire). ---
+    # --- Panneau (a) : grille 2x3 à forward contrôlé, barres groupées nu vs
+    # Vol Target 15% pour chaque niveau de décrément -- lecture directe de
+    # l'effet Vol Target "toutes choses égales par ailleurs" (même forward
+    # théorique sur chaque paire). Vol Target 10% ajouté en 3e barre
+    # UNIQUEMENT à D=3%=q (seule configuration VT10 de la figure), pour une
+    # comparaison directe à VT15 sans élargir les colonnes 0% et 5% où elle
+    # n'existe pas. ---
     labels_decrement = ["0% (= rendement total)", "3% (= q)", "5%"]
     x = np.arange(len(DECREMENTS_GRILLE))
-    largeur = 0.35
+    largeur = 0.25
     coupons_nu = [resultats[f"nu_{d}"]["coupon_pair"] * 100 for d in DECREMENTS_GRILLE]
     erreurs_nu = [resultats[f"nu_{d}"]["coupon_ic95_demi_largeur"] * 100 for d in DECREMENTS_GRILLE]
     coupons_vt = [resultats[f"vt15_{d}"]["coupon_pair"] * 100 for d in DECREMENTS_GRILLE]
     erreurs_vt = [resultats[f"vt15_{d}"]["coupon_ic95_demi_largeur"] * 100 for d in DECREMENTS_GRILLE]
+    coupon_vt10 = resultats["vt10_decr3"]["coupon_pair"] * 100
+    erreur_vt10 = resultats["vt10_decr3"]["coupon_ic95_demi_largeur"] * 100
+    index_3pct = list(DECREMENTS_GRILLE).index("decr3")
 
-    barres_nu = ax_coupon.bar(x - largeur / 2, coupons_nu, width=largeur, yerr=erreurs_nu,
+    barres_nu = ax_coupon.bar(x - largeur, coupons_nu, width=largeur, yerr=erreurs_nu,
                                color=COULEURS["nu_decr0"], capsize=4, label="Indice nu")
-    barres_vt = ax_coupon.bar(x + largeur / 2, coupons_vt, width=largeur, yerr=erreurs_vt,
+    barres_vt = ax_coupon.bar(x, coupons_vt, width=largeur, yerr=erreurs_vt,
                                color=COULEURS["vt15_decr0"], capsize=4, label="Vol Target 15%")
+    barre_vt10 = ax_coupon.bar([x[index_3pct] + largeur], [coupon_vt10], width=largeur,
+                                yerr=[erreur_vt10], color=COULEURS["vt10_decr3"], capsize=4,
+                                label="Vol Target 10%")
     # Valeurs affichées sur les barres : la figure doit se lire seule, sans
     # repasser par RESULTATS.md pour connaître les coupons exacts -- utile ici
     # en particulier parce que les écarts nu/VT15 à forward contrôlé sont
@@ -454,33 +494,61 @@ def tracer_figure(resultats):
                          padding=3, fontsize=8)
     ax_coupon.bar_label(barres_vt, labels=[f"{c:.2f}%" for c in coupons_vt],
                          padding=3, fontsize=8)
+    ax_coupon.bar_label(barre_vt10, labels=[f"{coupon_vt10:.2f}%"], padding=3, fontsize=8)
     ax_coupon.set_xticks(x)
     ax_coupon.set_xticklabels(labels_decrement)
     ax_coupon.set_xlabel("Décrément en % (forward contrôlé à D fixé)")
     ax_coupon.set_ylabel("Coupon annuel au pair (%, IC95%)")
     ax_coupon.margins(y=0.12)
     ax_coupon.legend()
+    ax_coupon.text(0.0, 1.03, "(a)", transform=ax_coupon.transAxes,
+                    fontsize=14, fontweight="bold", va="bottom", ha="left")
 
-    # --- Panneau secondaire : rappel / PDI / perte conditionnelle pour les 8
-    # configurations (barres groupées, axe de pourcentage partagé -- cf.
-    # convention de la Figure B). ---
-    noms = NOMS
+    # --- Panneau (b) : rappel / PDI / perte conditionnelle pour les 8
+    # configurations, réordonnées pour regrouper visuellement par niveau de
+    # décrément (0% / 3% / 5% / points), avec un espacement entre blocs --
+    # plus lisible que l'ordre de construction (NOMS) pour relier ce panneau
+    # au panneau (a). Palette différente du panneau (a) à dessein : (a)
+    # encode la CONFIGURATION par la couleur (bleu=nu, rouge=VT15,
+    # sarcelle=VT10), (b) encode la MÉTRIQUE par la couleur -- réutiliser
+    # bleu/rouge ici créerait une fausse association entre les deux
+    # panneaux. ---
+    blocs = [
+        ["nu_decr0", "vt15_decr0"],
+        ["nu_decr3", "vt15_decr3", "vt10_decr3"],
+        ["nu_decr5", "vt15_decr5"],
+        ["vt15_decr_pts"],
+    ]
+    noms = [nom for bloc in blocs for nom in bloc]
     libelles_courts = [LIBELLES_COURTS[n] for n in noms]
-    x2 = np.arange(len(noms))
+
+    ecart_bloc = 0.7
+    x2 = []
+    curseur = 0.0
+    for i, bloc in enumerate(blocs):
+        if i > 0:
+            curseur += ecart_bloc
+        for _ in bloc:
+            x2.append(curseur)
+            curseur += 1.0
+    x2 = np.array(x2)
+
     largeur2 = 0.25
     proba_rappel = [resultats[n]["proba_rappel_avant_maturite"] * 100 for n in noms]
     proba_pdi = [resultats[n]["proba_pdi"] * 100 for n in noms]
     pertes = [resultats[n]["perte_cond"] * 100 for n in noms]
-    ax_risque.bar(x2 - largeur2, proba_rappel, width=largeur2, color="#1f77b4",
+    ax_risque.bar(x2 - largeur2, proba_rappel, width=largeur2, color=COULEUR_RAPPEL,
                   label="Proba. rappel avant maturité")
-    ax_risque.bar(x2, proba_pdi, width=largeur2, color="#d62728",
+    ax_risque.bar(x2, proba_pdi, width=largeur2, color=COULEUR_PDI,
                   label="Proba. activation PDI")
-    ax_risque.bar(x2 + largeur2, pertes, width=largeur2, color="#7f7f7f",
+    ax_risque.bar(x2 + largeur2, pertes, width=largeur2, color=COULEUR_PERTE,
                   label="Perte moy. conditionnelle")
     ax_risque.set_xticks(x2)
     ax_risque.set_xticklabels(libelles_courts, rotation=25, ha="right")
     ax_risque.set_ylabel("Pourcentage (%)")
     ax_risque.legend(fontsize=8)
+    ax_risque.text(0.0, 1.03, "(b)", transform=ax_risque.transAxes,
+                    fontsize=14, fontweight="bold", va="bottom", ha="left")
 
     fig.tight_layout()
     chemin = os.path.join(REPERTOIRE_FIGURES, "figureE_vol_target_decrement.png")
@@ -490,4 +558,11 @@ def tracer_figure(resultats):
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == "--figure-seule":
+        # Retouches visuelles (couleurs, mise en page, annotations) sans
+        # relancer les 200 000 trajectoires : relit figureE_resultats.csv,
+        # déjà à jour, et ne régénère que le PNG.
+        os.makedirs(REPERTOIRE_FIGURES, exist_ok=True)
+        tracer_figure(charger_resultats_pour_figure())
+    else:
+        main()
