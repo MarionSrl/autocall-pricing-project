@@ -1,6 +1,6 @@
 # Résultats numériques du mémoire
 
-Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par `scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py`, `figC_hedging_produit_notebook.py` et `figD_volatility_target.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). **Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer si un paramètre ou une seed change.
+Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par `scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py`, `figC_hedging_produit_notebook.py`, `figD_volatility_target.py` et `figE_vol_target_decrement.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). **Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer si un paramètre ou une seed change.
 
 ## Figure A — Sensibilités du PDI et de l'autocall
 
@@ -67,3 +67,16 @@ Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV p
 | Niveau plancher (creux) de l'indice nu dans le scénario V | 70.00 |
 | Niveau plancher (creux) de l'indice VT dans le scénario V, fenêtre 20j | 63.79 |
 | Niveau plancher (creux) de l'indice VT dans le scénario V, fenêtre 60j | 61.17 |
+
+## Figure E — Indice Volatility Target et décrément (grille à forward contrôlé)
+
+| Configuration | Coupon au pair (%) | IC95 (demi-largeur, %) | Vol réalisée moy. (%) | Proba. rappel avant maturité (%) | Proba. activation PDI (%) | Perte moy. conditionnelle (%) | Forward théorique 10 ans | Forward MC 10 ans | Proba. indice nul (%) |
+|---|---|---|---|---|---|---|---|---|---|
+| Indice nu, décrément 0% (= rendement total) | 6.42 | 0.05 | 17.71 | 85.84 | 7.19 | 55.54 | 128.40 | 128.60 | 0.00 |
+| Indice nu, décrément 3% (= Price Return q=3%) | 11.46 | 0.10 | 17.71 | 75.03 | 16.07 | 58.26 | 95.12 | 95.27 | 0.00 |
+| Indice nu, décrément 5% | 17.65 | 0.16 | 17.71 | 66.44 | 24.45 | 60.55 | 77.88 | 78.00 | 0.00 |
+| Vol Target 15%, décrément 0% (= rendement total) | 5.89 | 0.05 | 16.17 | 86.59 | 5.94 | 53.50 | 128.40 | 128.49 | 0.00 |
+| Vol Target 15%, décrément 3% | 10.87 | 0.10 | 16.17 | 75.10 | 14.75 | 56.37 | 95.12 | 95.19 | 0.00 |
+| Vol Target 15%, décrément 5% | 17.42 | 0.16 | 16.17 | 65.96 | 23.73 | 58.60 | 77.88 | 77.93 | 0.00 |
+| Vol Target 10%, décrément 3% | 8.90 | 0.07 | 11.86 | 75.52 | 9.50 | 50.84 | 95.12 | 95.17 | 0.00 |
+| Vol Target 15% + décrément points (K=5, plancher 0) | 25.60 | 0.24 | 16.18 | 63.01 | 31.18 | 70.55 | 71.60 | 71.67 | 0.86 |

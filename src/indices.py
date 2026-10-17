@@ -124,6 +124,50 @@ def forward_theorique_decrement_points(s0, r, K, T, nb_pas_an):
     return m**n * s0 - K * dt * (m**n - 1.0) / (m - 1.0)
 
 
+def appliquer_decrement_points(trajectoire_quotidienne, K, nb_pas_an, jours_par_an=365.0):
+    """Applique un décrément en points K à une trajectoire quotidienne déjà
+    construite -- n'importe quel indice, y compris un indice Volatility
+    Target (cf. Figure E) : le décrément en points n'est pas, contrairement
+    au décrément en %, un simple multiplicateur applicable a posteriori aux
+    dates d'observation ; il est path-dépendant et doit être recalculé au pas
+    quotidien sur la trajectoire complète.
+
+        I_t = max( I_{t-1} * (X_t / X_{t-1}) - K * d(t-1,t) / jours_par_an , 0 )
+
+    Même récurrence que l'indice C de `simuler_indices` (le prélèvement K
+    devient proportionnellement plus lourd quand l'indice baisse), généralisée
+    ici à une trajectoire quotidienne X quelconque fournie en entrée plutôt
+    qu'à l'indice total return U construit en interne -- pas de nouvelle
+    simulation, pure transformation déterministe pas à pas d'une trajectoire
+    déjà simulée.
+
+    Différence volontaire avec l'indice C de la Figure B : ici, I_t est
+    PLANCHERISÉ à 0 (barrière absorbante -- une fois atteint 0, l'indice y
+    reste, puisque 0 * ratio - décrément reste <= 0). L'indice C de la Figure
+    B n'est lui pas plancherisé (cf. sa propre récurrence dans
+    `simuler_indices`, volontairement inchangée). La raison : I_t sert ici de
+    sous-jacent à un produit à capital protégé/à risque (PDI), dont la perte
+    de l'investisseur est `1 - I_T/I_0` -- sans plancher, un indice négatif
+    ferait apparaître une perte supérieure à 100 % du nominal, ce qui n'a pas
+    de sens pour un investisseur qui n'a jamais été short. Avec le plancher,
+    I_T >= 0 systématiquement, donc la perte reste bornée à 100 % (cf.
+    `tests/test_figure_e.py::test_decrement_points_plancher_absorbant_et_perte_plafonnee`).
+
+    trajectoire_quotidienne : array (nb_sim, nb_jours+1), pas quotidien.
+    Retourne l'indice décrémenté (>= 0 partout), même forme.
+    """
+    dt_jours = jours_par_an / nb_pas_an
+    decrement_par_pas = K * dt_jours / jours_par_an
+    ratios = trajectoire_quotidienne[:, 1:] / trajectoire_quotidienne[:, :-1]
+    nb_sim, nb_jours = ratios.shape
+
+    indice = np.empty((nb_sim, nb_jours + 1))
+    indice[:, 0] = trajectoire_quotidienne[:, 0]
+    for t in range(nb_jours):
+        indice[:, t + 1] = np.maximum(indice[:, t] * ratios[:, t] - decrement_par_pas, 0.0)
+    return indice
+
+
 def barriere_degressive(dates_obs, niveau_initial=1.0, baisse_annuelle=0.05, plancher=0.70):
     """Barrière de rappel dégressive : niveau_initial - baisse_annuelle * t,
     plafonnée à plancher. dates_obs en années (t=1..T)."""
