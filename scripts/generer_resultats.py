@@ -168,20 +168,20 @@ def section_figureD():
 def section_figureE():
     df = _lire("figureE_resultats.csv")
     lignes = [
-        "## Figure E — Indice Volatility Target et décrément",
+        "## Figure E — Indice Volatility Target et décrément (grille à forward contrôlé)",
         "",
         "| Configuration | Coupon au pair (%) | IC95 (demi-largeur, %) | Vol réalisée moy. (%) | "
         "Proba. rappel avant maturité (%) | Proba. activation PDI (%) | Perte moy. conditionnelle (%) | "
-        "Forward MC 10 ans | Proba. indice négatif (%) |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "Forward théorique 10 ans | Forward MC 10 ans | Proba. indice nul (%) |",
+        "|---|---|---|---|---|---|---|---|---|---|",
     ]
     for _, ligne in df.iterrows():
         lignes.append(
             f"| {ligne['configuration']} | {_fmt(ligne['coupon_pair_pct'])} | "
             f"{_fmt(ligne['coupon_ic95_demi_largeur_pct'])} | {_fmt(ligne['vol_realisee_moyenne_pct'])} | "
             f"{_fmt(ligne['proba_rappel_avant_maturite_pct'])} | {_fmt(ligne['proba_pdi_actif_pct'])} | "
-            f"{_fmt(ligne['perte_moyenne_cond_pct'])} | {_fmt(ligne['forward_mc_10y'])} | "
-            f"{_fmt(ligne['proba_indice_negatif_pct'])} |"
+            f"{_fmt(ligne['perte_moyenne_cond_pct'])} | {_fmt(ligne['forward_theorique_10y'])} | "
+            f"{_fmt(ligne['forward_mc_10y'])} | {_fmt(ligne['proba_indice_nul_pct'])} |"
         )
     return "\n".join(lignes)
 

@@ -14,7 +14,7 @@ long terme ?*
 | `src/` | Modules de pricing : simulation, indices A/B/C, pricer autocall, PDI, coupon, Volatility Target, delta hedging |
 | `scripts/` | Un script par figure du mémoire, plus `run_all.py` pour tout régénérer |
 | `figures/` | PNG (300 dpi) et CSV/MD de résultats, un jeu par figure |
-| `tests/` | Tests pytest (40) |
+| `tests/` | Tests pytest (42) |
 | `RESULTATS.md` | Tous les chiffres cités dans le mémoire, regroupés par figure |
 
 ## Installation et reproduction
@@ -23,7 +23,7 @@ long terme ?*
 pip install -r requirements.txt
 
 python scripts/run_all.py   # régénère les 5 figures + RESULTATS.md (~20 min, Figure E ~16 min)
-pytest tests/                # lance les 40 tests
+pytest tests/                # lance les 42 tests
 ```
 
 Chaque figure peut aussi être relancée seule, par exemple :
@@ -65,14 +65,16 @@ produit de référence des Figures A, B et D** — voir « Conventions à conna�
 sur un modèle de volatilité à 2 régimes : trajectoire type, distribution de la vol
 réalisée face à la cible, et scénario de crash-rebond scripté.
 
-**Figure E — Indice Volatility Target et décrément** (`figE_vol_target_decrement.py`).
-Sur le produit de référence (identique à la Figure B) et le même modèle de volatilité à
-2 régimes que la Figure D, compare le coupon au pair, la vol réalisée moyenne, les
-probabilités de rappel et d'activation du PDI, et la perte conditionnelle, sur 5
-configurations d'indice sous-jacent : indice classique (price return), Volatility
-Target seul (cibles 15 % et 10 %), puis Volatility Target 15 % combiné à un décrément
-(en % et en points). Toutes les configurations partagent les mêmes trajectoires
-browniennes.
+**Figure E — Indice Volatility Target et décrément, à forward contrôlé**
+(`figE_vol_target_decrement.py`). Sur le produit de référence (identique à la Figure B)
+et le même modèle de volatilité à 2 régimes que la Figure D, compare le coupon au pair
+d'un indice nu (jambe total return) à celui d'un indice Volatility Target 15 %, à
+travers une grille de 3 niveaux de décrément en % (0 %, 3 %=q, 5 %) qui égalise le
+forward théorique des deux lignes à chaque colonne — isolant ainsi l'effet de
+volatilité de l'effet de forward (voir « Conventions à connaître » ci-dessous). Complété
+par deux configurations hors grille : Volatility Target 10 % + décrément 3 %, et
+Volatility Target 15 % + décrément en points (K=5, indice plancherisé à 0). Toutes les
+configurations partagent les mêmes trajectoires browniennes.
 
 Tous les chiffres (coupons, sensibilités, sous-participation, gamma moyen...) sont
 dans **[`RESULTATS.md`](RESULTATS.md)**.
@@ -204,13 +206,25 @@ jour par un levier plafonné L_t = min(L_max, σ_cible / σ̂_t), où σ̂_t est
 réalisée sur une fenêtre glissante de 20 jours ouvrés — un estimateur qui, par
 construction, n'utilise que l'information connue à la clôture de la veille, et retarde
 donc nécessairement d'un jour le réajustement du levier par rapport à un choc de
-volatilité instantané. Le décrément, lorsqu'il est combiné au Vol Target, est appliqué
-après coup sur cet indice déjà reconstitué, comme dans les indices propriétaires
-réellement commercialisés. Le décrément en points, path-dépendant et non plafonné à
-zéro par construction (même convention que l'indice C de la Figure B), peut dans de
-rares trajectoires de queue faire passer l'indice en territoire négatif une fois la
-valeur nulle franchie ; cette probabilité est mesurée et reportée telle quelle dans
-`RESULTATS.md`, plutôt que neutralisée par un plancher artificiel.
+volatilité instantané. Une fois actualisées à r, la jambe total return et la poche de
+cash sont chacune des martingales sous Q, et un rebalancement à poids prévisibles entre
+deux martingales actualisées en est une aussi : l'indice Volatility Target sans
+décrément a donc un forward à maturité égal à S0*exp(r*T), exactement comme la jambe
+total return dont il part — ce n'est pas un effet du cash accumulé pendant les phases
+de stress, mais une simple conséquence de cette propriété de martingale. Comparer
+directement cet indice à l'indice « price return » usuel (dividende détaché, forward
+S0*exp((r-q)*T), nettement plus bas) mélangerait donc un effet de forward mécanique et
+l'effet de volatilité que la figure cherche à isoler. La figure neutralise cet effet en
+appliquant à l'indice nu et à l'indice Volatility Target le même décrément en %, à trois
+niveaux (0 %, puis 3 % = q, directement comparable à l'indice price return usuel, puis
+5 %) : à niveau de décrément D fixé, les deux lignes ont exactement le même forward
+théorique S0*exp((r-D)*T), si bien que l'écart de coupon au pair observé à D fixé est
+imputable à la seule volatilité. Le décrément en points (configuration hors grille,
+K=5, comme la Figure B) est, lui, plancherisé à 0 — une différence volontaire avec
+l'indice C de la Figure B (resté inchangé) : au-delà de ce plancher, la perte de
+l'investisseur sur un produit à capital protégé/à risque ne peut en effet pas dépasser
+100 % du nominal, ce que vérifient les tests dédiés. La fraction de trajectoires ayant
+atteint ce plancher est mesurée et reportée telle quelle dans `RESULTATS.md`.
 
 Enfin, la Figure C, consacrée à la couverture en delta et à ses risques résiduels,
 porte délibérément sur un produit distinct de celui des Figures A, B et D : le produit
