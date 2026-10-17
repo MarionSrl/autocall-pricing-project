@@ -442,14 +442,23 @@ def tracer_figure(resultats):
     coupons_vt = [resultats[f"vt15_{d}"]["coupon_pair"] * 100 for d in DECREMENTS_GRILLE]
     erreurs_vt = [resultats[f"vt15_{d}"]["coupon_ic95_demi_largeur"] * 100 for d in DECREMENTS_GRILLE]
 
-    ax_coupon.bar(x - largeur / 2, coupons_nu, width=largeur, yerr=erreurs_nu,
-                  color=COULEURS["nu_decr0"], capsize=4, label="Indice nu")
-    ax_coupon.bar(x + largeur / 2, coupons_vt, width=largeur, yerr=erreurs_vt,
-                  color=COULEURS["vt15_decr0"], capsize=4, label="Vol Target 15%")
+    barres_nu = ax_coupon.bar(x - largeur / 2, coupons_nu, width=largeur, yerr=erreurs_nu,
+                               color=COULEURS["nu_decr0"], capsize=4, label="Indice nu")
+    barres_vt = ax_coupon.bar(x + largeur / 2, coupons_vt, width=largeur, yerr=erreurs_vt,
+                               color=COULEURS["vt15_decr0"], capsize=4, label="Vol Target 15%")
+    # Valeurs affichées sur les barres : la figure doit se lire seule, sans
+    # repasser par RESULTATS.md pour connaître les coupons exacts -- utile ici
+    # en particulier parce que les écarts nu/VT15 à forward contrôlé sont
+    # resserrés (quelques dixièmes de point) et peu lisibles sur l'axe seul.
+    ax_coupon.bar_label(barres_nu, labels=[f"{c:.2f}%" for c in coupons_nu],
+                         padding=3, fontsize=8)
+    ax_coupon.bar_label(barres_vt, labels=[f"{c:.2f}%" for c in coupons_vt],
+                         padding=3, fontsize=8)
     ax_coupon.set_xticks(x)
     ax_coupon.set_xticklabels(labels_decrement)
     ax_coupon.set_xlabel("Décrément en % (forward contrôlé à D fixé)")
     ax_coupon.set_ylabel("Coupon annuel au pair (%, IC95%)")
+    ax_coupon.margins(y=0.12)
     ax_coupon.legend()
 
     # --- Panneau secondaire : rappel / PDI / perte conditionnelle pour les 8
