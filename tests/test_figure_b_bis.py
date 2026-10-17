@@ -1,4 +1,4 @@
-"""Tests pour la Figure E (extension : impact d'un indice Volatility Target
+"""Tests pour la Figure B bis (extension : impact d'un indice Volatility Target
 sur le coupon au pair, à forward contrôlé, seul puis combiné à un décrément).
 
 Échelles réduites par rapport au script de figure (200 000 trajectoires) pour
@@ -42,7 +42,7 @@ def test_indice_vt_martingale_sous_q():
     # E[exp(-rT) * VT_T] = VT_0 = S0, à l'erreur Monte Carlo près. C'est cette
     # propriété -- pas un "effet du cash en période de stress" -- qui explique
     # le forward élevé (~S0*exp(rT)) d'un indice Vol Target sans décrément :
-    # voir la docstring de scripts/figE_vol_target_decrement.py.
+    # voir la docstring de scripts/figBbis_vol_target_decrement.py.
     nb_sim, T = 40_000, 2
     nb_jours = NB_PAS_AN * T
     sigma = simuler_regimes(nb_jours, nb_sim, seed=21, sigma_bas=SIGMA_BAS, sigma_haut=SIGMA_HAUT,
@@ -103,7 +103,7 @@ def test_coupon_pair_monotone_en_decrement():
 
 def test_coupon_pair_identique_nu_decrement3_vs_price_return():
     # Cas de contrôle, généralisation à la vol à 2 régimes du cas B' de la
-    # Figure B : l'indice nu construit en Figure E (jambe total return
+    # Figure B : l'indice nu construit en Figure B bis (jambe total return
     # décrémentée à D=3%=q) doit être identique, TRAJECTOIRE PAR TRAJECTOIRE,
     # à l'indice "price return" simulé directement avec dividende q=3%, dès
     # lors que les deux partagent la même seed de chocs et le même chemin de
@@ -163,9 +163,9 @@ def test_decrement_points_plancher_absorbant_et_perte_plafonnee():
     decr = appliquer_decrement_points(traj, K, nb_pas_an=365.0, jours_par_an=365.0)
     np.testing.assert_allclose(decr[0], [100.0, 0.0, 0.0, 0.0])
 
-    # 2) Cas Monte Carlo (indice Vol Target), même K que la Figure E (K=5) :
+    # 2) Cas Monte Carlo (indice Vol Target), même K que la Figure B bis (K=5) :
     #    déjà suffisant pour qu'une fraction de trajectoires touche le
-    #    plancher (cf. figures/figureE_resultats.csv, ~0.9% à 200 000
+    #    plancher (cf. figures/figureBbis_resultats.csv, ~0.9% à 200 000
     #    trajectoires -- un K plus agressif ferait tomber la quasi-totalité
     #    des trajectoires à 0 bien avant maturité et empêcherait le solveur
     #    de coupon de converger). Vérifie, à travers le pricer complet, que

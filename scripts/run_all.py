@@ -4,9 +4,9 @@ unique (src/marche.py::SEED_GLOBAL). À relancer si un paramètre ou la seed
 change, pour que tous les chiffres cités dans le mémoire restent cohérents
 entre eux.
 
-Compter ~20 minutes (figE_vol_target_decrement.py est de loin le plus long,
-~16 min, du fait de la construction quotidienne de l'indice Vol Target sur
-200 000 trajectoires x 10 ans ; figC_hedging_produit_notebook.py vient
+Compter ~20 minutes (figBbis_vol_target_decrement.py est de loin le plus
+long, ~16 min, du fait de la construction quotidienne de l'indice Vol Target
+sur 200 000 trajectoires x 10 ans ; figC_hedging_produit_notebook.py vient
 ensuite, ~3 min, du fait de la simulation de couverture path-dépendante).
 
 Usage : python scripts/run_all.py
@@ -20,19 +20,19 @@ import time
 REPERTOIRE_RACINE = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 REPERTOIRE_SCRIPTS = os.path.join(REPERTOIRE_RACINE, "scripts")
 
-# Ordre alphabétique des figures (A, B, C, D, E), qui suit l'ordre de lecture
-# du mémoire : Figure A (III.1.1), Figure B (III.1.3), Figure C -- delta
-# hedging (III.2), Figure D -- Volatility Target (III.3), Figure E --
-# extension Vol Target + décrément. Les 5 scripts sont indépendants (aucun ne
-# lit la sortie d'un autre) ; cet ordre est donc éditorial, pas une
-# contrainte technique. generer_resultats.py, lui, doit venir en dernier : il
-# lit les CSV que les 5 scripts précédents viennent d'écrire.
+# Ordre de lecture du mémoire : Figure A (III.1.1), Figure B (III.1.3),
+# Figure B bis -- extension de la Figure B (Vol Target + décrément), Figure C
+# -- delta hedging (III.2), Figure D -- Volatility Target (III.3). Les 5
+# scripts sont indépendants (aucun ne lit la sortie d'un autre) ; cet ordre
+# est donc éditorial, pas une contrainte technique. generer_resultats.py,
+# lui, doit venir en dernier : il lit les CSV que les 5 scripts précédents
+# viennent d'écrire.
 ETAPES = [
     "figA_sensibilites_pdi_autocall.py",
     "figB_autocall_vs_decrement.py",
+    "figBbis_vol_target_decrement.py",
     "figC_hedging_produit_notebook.py",
     "figD_volatility_target.py",
-    "figE_vol_target_decrement.py",
     "generer_resultats.py",
 ]
 

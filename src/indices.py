@@ -127,7 +127,7 @@ def forward_theorique_decrement_points(s0, r, K, T, nb_pas_an):
 def appliquer_decrement_points(trajectoire_quotidienne, K, nb_pas_an, jours_par_an=365.0):
     """Applique un décrément en points K à une trajectoire quotidienne déjà
     construite -- n'importe quel indice, y compris un indice Volatility
-    Target (cf. Figure E) : le décrément en points n'est pas, contrairement
+    Target (cf. Figure B bis) : le décrément en points n'est pas, contrairement
     au décrément en %, un simple multiplicateur applicable a posteriori aux
     dates d'observation ; il est path-dépendant et doit être recalculé au pas
     quotidien sur la trajectoire complète.
@@ -151,7 +151,7 @@ def appliquer_decrement_points(trajectoire_quotidienne, K, nb_pas_an, jours_par_
     ferait apparaître une perte supérieure à 100 % du nominal, ce qui n'a pas
     de sens pour un investisseur qui n'a jamais été short. Avec le plancher,
     I_T >= 0 systématiquement, donc la perte reste bornée à 100 % (cf.
-    `tests/test_figure_e.py::test_decrement_points_plancher_absorbant_et_perte_plafonnee`).
+    `tests/test_figure_b_bis.py::test_decrement_points_plancher_absorbant_et_perte_plafonnee`).
 
     trajectoire_quotidienne : array (nb_sim, nb_jours+1), pas quotidien.
     Retourne l'indice décrémenté (>= 0 partout), même forme.

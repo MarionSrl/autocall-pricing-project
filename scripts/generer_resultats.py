@@ -1,6 +1,6 @@
 """Génère RESULTATS.md à la racine du repo : tous les chiffres cités dans le
 mémoire, regroupés par figure, à partir des CSV déjà produits par les scripts
-de figure (figA_*.py, figB_*.py, figC_*.py, figD_*.py).
+de figure (figA_*.py, figB_*.py, figBbis_*.py, figC_*.py, figD_*.py).
 
 Ne relance aucune simulation : suppose que figures/*.csv existent déjà. Pour
 tout régénérer depuis zéro (figures + ce fichier), utiliser scripts/run_all.py.
@@ -165,10 +165,10 @@ def section_figureD():
     return "\n".join(lignes)
 
 
-def section_figureE():
-    df = _lire("figureE_resultats.csv")
+def section_figureBbis():
+    df = _lire("figureBbis_resultats.csv")
     lignes = [
-        "## Figure E — Indice Volatility Target et décrément (grille à forward contrôlé)",
+        "## Figure B bis — Indice Volatility Target et décrément (grille à forward contrôlé)",
         "",
         "| Configuration | Coupon au pair (%) | IC95 (demi-largeur, %) | Vol réalisée moy. (%) | "
         "Proba. rappel avant maturité (%) | Proba. activation PDI (%) | Perte moy. conditionnelle (%) | "
@@ -191,16 +191,16 @@ def main():
         "# Résultats numériques du mémoire",
         "Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par "
         "`scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py`, "
-        "`figC_hedging_produit_notebook.py`, `figD_volatility_target.py` et "
-        "`figE_vol_target_decrement.py` "
+        "`figBbis_vol_target_decrement.py`, `figC_hedging_produit_notebook.py` et "
+        "`figD_volatility_target.py` "
         "(seed globale unique, `src/marche.py::SEED_GLOBAL`). "
         "**Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer "
         "si un paramètre ou une seed change.",
         section_figureA(),
         section_figureB(),
+        section_figureBbis(),
         section_figureC(),
         section_figureD(),
-        section_figureE(),
     ])
     chemin = os.path.join(REPERTOIRE_RACINE, "RESULTATS.md")
     with open(chemin, "w") as f:

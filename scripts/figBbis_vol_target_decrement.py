@@ -1,4 +1,4 @@
-"""Figure E — Effet d'un indice Volatility Target sur le coupon au pair d'un
+"""Figure B bis — Effet d'un indice Volatility Target sur le coupon au pair d'un
 autocall, à forward contrôlé, seul puis combiné à un décrément (extension du
 mémoire).
 
@@ -19,7 +19,7 @@ Une première version de cette figure comparait directement l'indice nu
 indice Vol Target construit SANS décrément sur la jambe total return
 (dividendes réinvestis, forward 10 ans = S0*exp(r*T) ~ 128.4 -- c'est la
 propriété de martingale actualisée de l'indice VT, cf.
-`tests/test_figure_e.py::test_indice_vt_martingale_sous_q`, PAS un "effet du
+`tests/test_figure_b_bis.py::test_indice_vt_martingale_sous_q`, PAS un "effet du
 cash en période de stress" comme une lecture rapide pourrait le suggérer).
 L'écart de coupon entre les deux mélangeait donc un effet de forward (~33
 points d'indice d'écart, mécanique, rien à voir avec la volatilité) et
@@ -37,7 +37,7 @@ Tout écart de coupon entre les deux lignes à D fixé est donc un effet de
 volatilité pur, plus de forward. La colonne D=3%=q est de plus directement
 comparable à l'indice "price return" historique des Figures A, B et D
 (même forward, même mécanisme que le cas de contrôle B' de la Figure B --
-voir `tests/test_figure_e.py::test_coupon_pair_identique_nu_decrement3_vs_price_return`).
+voir `tests/test_figure_b_bis.py::test_coupon_pair_identique_nu_decrement3_vs_price_return`).
 
 Deux configurations supplémentaires sont conservées hors de cette grille
 2x3, pour exposition complète du mécanisme :
@@ -59,7 +59,7 @@ cohérente en risque neutre : la jambe risquée et la poche cash sont chacune,
 une fois actualisées à r, des martingales sous Q, et un portefeuille
 rebalancé à poids prévisibles (connus à t-1) entre deux martingales
 actualisées en est une aussi -- vérifié empiriquement par
-`tests/test_figure_e.py::test_indice_vt_martingale_sous_q`.
+`tests/test_figure_b_bis.py::test_indice_vt_martingale_sous_q`.
 
 Le décrément (en %, aux niveaux 0/3/5 ; en points, K=5 comme la Figure B) est
 appliqué APRÈS le Vol Target ou après l'indice nu, comme dans les indices
@@ -93,8 +93,8 @@ mesure la masse de probabilité absorbée à 0.
 
 200 000 trajectoires, pas quotidien (252/an), 10 ans.
 
-Écrit figures/figureE_vol_target_decrement.png (300 dpi) et les résultats
-numériques dans figures/figureE_resultats.{csv,md}.
+Écrit figures/figureBbis_vol_target_decrement.png (300 dpi) et les résultats
+numériques dans figures/figureBbis_resultats.{csv,md}.
 """
 
 import os
@@ -363,13 +363,13 @@ def coupon_ic95(resultat, r):
 
 
 def charger_resultats_pour_figure():
-    """Recharge les résultats déjà écrits dans figures/figureE_resultats.csv
+    """Recharge les résultats déjà écrits dans figures/figureBbis_resultats.csv
     (aucune nouvelle simulation) -- utile pour régénérer uniquement le rendu
     de la figure (couleurs, mise en page, annotations) sans relancer les
     200 000 trajectoires, tant que le CSV reflète déjà la dernière
     simulation. Reconstruit le même dict que la boucle de `main()` alimente
     `tracer_figure` avec, à partir des seules colonnes nécessaires au tracé."""
-    chemin_csv = os.path.join(REPERTOIRE_FIGURES, "figureE_resultats.csv")
+    chemin_csv = os.path.join(REPERTOIRE_FIGURES, "figureBbis_resultats.csv")
     df = pd.read_csv(chemin_csv)
     libelle_vers_nom = {libelle: nom for nom, libelle in LIBELLES.items()}
     resultats = {}
@@ -451,7 +451,7 @@ def main():
               + (f", indice nul : {proba_nul * 100:.2f}%" if proba_nul > 0 else ""))
 
     df = pd.DataFrame(lignes)
-    ecrire_csv_et_md(df, os.path.join(REPERTOIRE_FIGURES, "figureE_resultats"), float_format="{:.3f}")
+    ecrire_csv_et_md(df, os.path.join(REPERTOIRE_FIGURES, "figureBbis_resultats"), float_format="{:.3f}")
 
     tracer_figure(resultats_figure)
     print(f"Terminé en {time.time() - t0:.1f}s")
@@ -551,7 +551,7 @@ def tracer_figure(resultats):
                     fontsize=14, fontweight="bold", va="bottom", ha="left")
 
     fig.tight_layout()
-    chemin = os.path.join(REPERTOIRE_FIGURES, "figureE_vol_target_decrement.png")
+    chemin = os.path.join(REPERTOIRE_FIGURES, "figureBbis_vol_target_decrement.png")
     fig.savefig(chemin, dpi=300)
     plt.close(fig)
     print(f"Figure enregistrée : {chemin}")
@@ -560,7 +560,7 @@ def tracer_figure(resultats):
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--figure-seule":
         # Retouches visuelles (couleurs, mise en page, annotations) sans
-        # relancer les 200 000 trajectoires : relit figureE_resultats.csv,
+        # relancer les 200 000 trajectoires : relit figureBbis_resultats.csv,
         # déjà à jour, et ne régénère que le PNG.
         os.makedirs(REPERTOIRE_FIGURES, exist_ok=True)
         tracer_figure(charger_resultats_pour_figure())
