@@ -49,8 +49,11 @@ vega du PDI seul est de signe constant, contrairement à celui de l'autocall com
 
 **Figure B — Autocall classique vs décrément** (`figB_autocall_vs_decrement.py`).
 Compare le coupon au pair, les probabilités de rappel et d'activation du PDI, et la
-perte conditionnelle, sur 6 cas : indice classique, décrément en %, décrément en
-points, barrière dégressive, et deux cas de contrôle (B′, C′).
+perte conditionnelle, sur 6 cas : indice classique, décrément en % (D=5 %/an), décrément
+en points (K=5 points par an sur un indice parti de 100 -- un prélèvement **fixe**, pas
+un pourcentage : il pèse proportionnellement plus lourd à mesure que l'indice baisse,
+contrairement au décrément en %, ce qui explique l'écart de coupon entre les deux cas),
+barrière dégressive, et deux cas de contrôle (B′, C′).
 
 **Figure B bis — Indice Volatility Target et décrément, à forward contrôlé**
 (`figBbis_vol_target_decrement.py`). Sur le produit de référence (identique à la Figure B)
@@ -64,13 +67,17 @@ Volatility Target 15 % + décrément en points (K=5, indice plancherisé à 0). 
 configurations partagent les mêmes trajectoires browniennes.
 
 **Figure C — Delta hedging et risques résiduels de couverture**
-(`figC_hedging_produit_notebook.py`). Panneau (a) : PnL de couverture en fonction du
-mismatch entre volatilité réalisée et volatilité modèle, avec prédiction théorique de
-gamma-trading superposée. Panneau (b) : dispersion du PnL selon la fréquence de
-rebalancement (quasi plate — le risque vient des discontinuités de payoff aux
-barrières, pas de la granularité du rebalancement). **Porte sur le produit du notebook
-d'exploration (5 ans, coupon fixe 7 %, vol modèle 20 %, sans dividende), pas sur le
-produit de référence des Figures A, B et D** — voir « Conventions à connaître » ci-dessous.
+(`figC_hedging_produit_notebook.py`). PnL exprimé en % du nominal (base 100, même échelle
+que le coupon). Panneau (a) : PnL de couverture (rebalancement à fréquence de référence,
+5 jours) en fonction du mismatch entre volatilité réalisée et volatilité modèle, avec
+prédiction théorique de gamma-trading superposée. Panneau (b) : dispersion du PnL selon
+la fréquence de rebalancement, **à volatilité réalisée = volatilité modèle (20 %, mismatch
+nul)** — le PnL théorique y est nul par construction, le PnL moyen observé (de l'ordre d'un
+point) n'est donc que du bruit résiduel : la dispersion reste quasi plate, le risque vient
+des discontinuités de payoff aux barrières (gap risk), pas de la granularité du
+rebalancement. **Porte sur le produit du notebook d'exploration (5 ans, coupon fixe 7 %,
+vol modèle 20 %, sans dividende), pas sur le produit de référence des Figures A, B et D**
+— voir « Conventions à connaître » ci-dessous.
 
 **Figure D — Indice Volatility Target** (`figD_volatility_target.py`). Indice construit
 sur un modèle de volatilité à 2 régimes : trajectoire type, distribution de la vol

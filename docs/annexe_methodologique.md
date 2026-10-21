@@ -11,9 +11,9 @@ Au sein de chaque figure, toutes les configurations comparées partagent exactem
 | Figure | Objectif | Produit | Paramètres | Modèle de volatilité | Trajectoires |
 |---|---|---|---|---|---|
 | A | Sensibilités (delta, vega, vanna) à l'approche de la barrière | PDI strike 100%, barrière 60% ; autocall de référence | S₀ = 100, r = 2.5%, q = 3%, σ = 18% | Constante ; formule fermée pour le PDI | 200 000 |
-| B | Effet du décrément sur le coupon au pair | Autocall de référence, six sous-jacents | Idem A ; décrément 3% (cas neutre) et 5% en pourcentage ou en points | Constante | 200 000 |
+| B | Effet du décrément sur le coupon au pair | Autocall de référence, six sous-jacents | Idem A ; décrément en % : 3% (cas neutre) et 5% ; décrément en points : K=5 (prélèvement fixe sur l'indice, pas un pourcentage) | Constante | 200 000 |
 | B bis | Effet du Volatility Target sur le coupon au pair, à forward identique | Autocall de référence, huit sous-jacents | Idem B ; cibles 15% et 10% ; décrément 0%, 3% et 5% | Deux régimes, identique à D | 200 000 |
-| C | Risque résiduel d'une couverture en delta | Autocall 5 ans, coupon fixe 7% | Volatilité modèle 20% ; volatilité réalisée de 15% à 30% | Constante | 2 000 par scénario |
+| C | Risque résiduel d'une couverture en delta | Autocall 5 ans, coupon fixe 7% | Volatilité modèle 20% ; volatilité réalisée de 15% à 30% ; PnL exprimé en % du nominal | Constante | 2 000 par scénario |
 | D | Fonctionnement et limites d'un indice Volatility Target | Indice seul | Cible 15%, levier plafonné à 150%, fenêtres de 20 et 60 jours | Deux régimes | 5 000 + un scénario de choc |
 
 L'autocall de référence est un Athena de maturité dix ans, à observations annuelles, avec une barrière de rappel à 100%, un coupon à mémoire et un Put Down-and-In de barrière 60% observée à maturité. Son coupon est résolu de sorte que le prix du produit égale 100% du nominal.

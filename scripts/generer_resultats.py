@@ -102,7 +102,10 @@ def section_figureC():
         f"| Trajectoires de la grille delta/gamma | {int(resume['nb_trajectoires_grille_delta'])} |",
         f"| Trajectoires de couverture par scénario | {int(resume['nb_trajectoires_couverture_par_scenario'])} |",
         "",
-        "| Vol réalisée (%) | PnL moyen | Erreur std | PnL théorique (gamma-trading) |",
+        "*PnL exprimé en % du nominal (base 100, même échelle que le coupon) -- rebalancement "
+        "à fréquence de référence (5 jours).*",
+        "",
+        "| Vol réalisée (%) | PnL moyen (% nominal) | Erreur std | PnL théorique (gamma-trading) |",
         "|---|---|---|---|",
     ]
     for _, ligne in df_vol.iterrows():
@@ -112,7 +115,12 @@ def section_figureC():
         )
     lignes += [
         "",
-        "| Fréquence de rebalancement | PnL moyen | Écart-type du PnL | Erreur std |",
+        f"*Dispersion du PnL selon la fréquence de rebalancement, à volatilité réalisée = "
+        f"volatilité modèle ({_fmt(resume['vol_modele_pct'])} %, mismatch nul) -- le PnL théorique "
+        f"de gamma-trading y est nul par construction, le PnL moyen observé n'est donc que du "
+        f"bruit résiduel (gap aux barrières), pas un effet de mismatch de volatilité.*",
+        "",
+        "| Fréquence de rebalancement | PnL moyen (% nominal) | Écart-type du PnL | Erreur std |",
         "|---|---|---|---|",
     ]
     for _, ligne in df_freq.iterrows():

@@ -50,14 +50,18 @@ Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV p
 | Trajectoires de la grille delta/gamma | 10000 |
 | Trajectoires de couverture par scénario | 2000 |
 
-| Vol réalisée (%) | PnL moyen | Erreur std | PnL théorique (gamma-trading) |
+*PnL exprimé en % du nominal (base 100, même échelle que le coupon) -- rebalancement à fréquence de référence (5 jours).*
+
+| Vol réalisée (%) | PnL moyen (% nominal) | Erreur std | PnL théorique (gamma-trading) |
 |---|---|---|---|
 | 15.00 | -2.52 | 0.14 | -3.94 |
 | 20.00 | 1.16 | 0.17 | -0.00 |
 | 25.00 | 5.02 | 0.24 | 5.07 |
 | 30.00 | 8.34 | 0.30 | 11.27 |
 
-| Fréquence de rebalancement | PnL moyen | Écart-type du PnL | Erreur std |
+*Dispersion du PnL selon la fréquence de rebalancement, à volatilité réalisée = volatilité modèle (20.00 %, mismatch nul) -- le PnL théorique de gamma-trading y est nul par construction, le PnL moyen observé n'est donc que du bruit résiduel (gap aux barrières), pas un effet de mismatch de volatilité.*
+
+| Fréquence de rebalancement | PnL moyen (% nominal) | Écart-type du PnL | Erreur std |
 |---|---|---|---|
 | 1j | 0.93 | 7.68 | 0.17 |
 | 5j | 0.84 | 7.50 | 0.17 |
