@@ -1,6 +1,6 @@
 # Résultats numériques du mémoire
 
-Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par `scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py`, `figBbis_vol_target_decrement.py`, `figC_hedging_produit_notebook.py` et `figD_volatility_target.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). **Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer si un paramètre ou une seed change.
+Généré automatiquement par `scripts/generer_resultats.py` à partir des CSV produits par `scripts/figA_sensibilites_pdi_autocall.py`, `figB_autocall_vs_decrement.py`, `figBbis_vol_target_decrement.py`, `figC_hedging_produit_notebook.py` et `figD_volatility_target.py` (seed globale unique, `src/marche.py::SEED_GLOBAL`). **Ne pas éditer à la main** : relancer `python scripts/run_all.py` pour tout régénérer si un paramètre ou une seed change. 
 
 ## Figure A — Sensibilités du PDI et de l'autocall
 
